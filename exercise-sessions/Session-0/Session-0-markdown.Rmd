@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, error = TRUE)
 ```
 
 ## Introduction to R
@@ -56,7 +56,9 @@ Vectors are used for lists of elements of the same type:
 ```{r}
 x <- c(1,3,5); x; typeof(x); x[2]+1
 ```
-Note that we started the value of the vector into a variable x via the assignment operation <- . We also accessed the second element of our vector by x[2]. Note that most programming languages start the indexing at 0, but not R. It starts at 1. This is probably more intuitive for most people, but confusing to those who have programmed with other languages.
+Note that we started the value of the vector into a variable x via the assignment operation <- . One can also use the = expression for assignment, but this can only be used in a simple assignment expression and may not be compatible with old versions of S-plus. I generally consider restricting assignment to simple expressions to be a good thing. 
+
+We also accessed the second element of our vector by x[2]. Note that most programming languages start the indexing at 0, but not R. It starts at 1. This is probably more intuitive for most people, but confusing to those who have programmed with other languages.
 
 Vectors of mixed types are coerced into one type:
 ```{r}
@@ -65,5 +67,141 @@ y <- c(1,"a"); y; typeof(y)
 We can see that R decided that I did not really want to include the number 1, in my list and turned it into a string. This is both 'helpful' and confusing. It can lead to unexpected errors:
 ```{r}
 y[1]+1
+```
+We can also generate vector sequences easily:
+```{r}
+seq1 <- 1:5; seq1; typeof(seq1)
+```
+```{r}
+seq2 <- seq(0,10,2); seq2
+```
+
+#### Lists
+To put mixed data types together we can create a list:
+```{r}
+list1 <- list(1, 2, "three", c(1,2,3)); list1; typeof(list)
+```
+We can access the elements as with vectors:
+```{r}
+list1[3]; typeof(list1[3])
+```
+Note that indexing still returns a list.
+```{r}
+list1[2]+2
+```
+Instead we need:
+```{r}
+list1[[2]]+2
+```
+### Matrices / Arrays
+
+We can build a matrix from a vector
+```{r}
+M1 = matrix( 1:20, nrow = 4, ncol = 5); M1
+```
+Transpose operation:
+```{r}
+t(M1)
+```
+
+Matrix multiplication is done as follows:
+```{r}
+t(M1)%*%M1
+```
+The standard multiplication is componentwise:
+```{r}
+1:5*2:6; 1:5 %*% 2:6
+```
+Note that R tries to be 'helpful' and change the vectors into column/row vectors to make sense of the multiplication.
+```{r}
+1:5*3
+```
+
+We can also create arrays, which are essentially tensors:
+```{r}
+T1 <- array(1:24, dim = c(2,3,4)); T1
+```
+
+We can access entries in arrays/matrices in the expected way:
+```{r}
+M1[[2,3]]; T1[[2,1,3]];
+```
+
+### Factors
+In data analysis we often have non-numeric values. These correspond to factors in R.
+```{r}
+genders <- c('male', 'female', 'female', 'male'); factor(genders);
+```
+
+### Data Frames
+One of the most common structures in data science is the data frame. This can be thought of as a large table, like a spreadsheet, but all of the columns must be of the same type.
+
+
+```{r}
+participants <- data.frame(
+  gender = c("male", "male", "female", "male"),
+  first_name = c("John", "Moritz", "Martha", "Bernd"),
+  age = c(19, 20, 18, 30)
+);
+print(participants)
+```
+We can access columns as follows:
+```{r}
+participants$first_name
+```
+Note that R tried to be 'helpful' and coerced all of the strings into factors. This is not desirable for the names.
+```{r}
+participants <- data.frame(
+  gender = c("male", "male", "female", "male"),
+  first_name = c("John", "Moritz", "Martha", "Bernd"),
+  age = c(19, 20, 18, 30), stringsAsFactors = FALSE
+);
+print(participants)
+```
+We do want the gender to be factor names:
+```{r}
+participants$gender = factor(participants$gender); participants
+```
+
+We can get columns and rows:
+```{r}
+participants[1:2]; participants[1:2,]
+```
+
+We can also select from the frame:
+```{r}
+subset(participants, gender == "male" & age < 25)
+```
+
+## Probability functions
+R has precisely 3 gazillion stats functions. Let's play with some standard ones.
+
+Here lets grab 20 samples from a standard normal distribution:
+```{r}
+y <- rnorm(20); y
+```
+Similarly from the uniform distribution (on the interval):
+```{r}
+x <- runif(20); x
+```
+
+We can then plot this:
+```{r}
+plot(x,y)
+```
+
+Or if want to get fancy (and we do), we can use ggplot2:
+```{r}
+library(ggplot2);
+df <- data.frame( xvals = x, yvals = y);
+ggplot(df, aes(x = xvals, y = yvals)) + geom_point();
+```
+
+Or the interactive version (just for this type of webpage):
+```{r message = FALSE}
+library(plotly);
+df <- data.frame( xvals = x, yvals = y);
+pl <- ggplot(df, aes(x = xvals, y = yvals)) + geom_point();
+ggplotly(pl)
 ```
 
