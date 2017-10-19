@@ -24,19 +24,46 @@ In particular we can use R as a calculator:
 sin(3)
 ```
 
+```{r}
+2^32
+```
+
 ### Data types
 
-
+Of course there are numeric types (integers, floating point numbers). 
 ```{r}
-summary(cars)
+3L; typeof(3L);
+3; typeof(3)
+```
+Here I executed multiple commands by separating them with a semicolon.
+
+There are character/string types for storing text:
+```{r}
+"this is text"; typeof("this is text")
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+Single and double quotes are interpreted the same:
+```{r}
+'this' == "this"
+```
+But it is convenient to use them when you need to text with quotation marks:
+```{r}
+'these are "quotes"'
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+#### Vectors
+Vectors are used for lists of elements of the same type:
+```{r}
+x <- c(1,3,5); x; typeof(x); x[2]+1
+```
+Note that we started the value of the vector into a variable x via the assignment operation <- . We also accessed the second element of our vector by x[2]. Note that most programming languages start the indexing at 0, but not R. It starts at 1. This is probably more intuitive for most people, but confusing to those who have programmed with other languages.
+
+Vectors of mixed types are coerced into one type:
+```{r}
+y <- c(1,"a"); y; typeof(y)
+```
+We can see that R decided that I did not really want to include the number 1, in my list and turned it into a string. This is both 'helpful' and confusing. It can lead to unexpected errors:
+```{r}
+y[1]+1
+```
+
