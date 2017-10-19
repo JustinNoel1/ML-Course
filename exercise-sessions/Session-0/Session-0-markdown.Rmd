@@ -21,7 +21,7 @@ R is often run in interactive mode. This means that there is an interpreter runn
 
 In particular we can use R as a calculator:
 ```{r}
-
+sin(3)
 ```
 
 ### Data types
