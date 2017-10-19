@@ -205,3 +205,97 @@ pl <- ggplot(df, aes(x = xvals, y = yvals)) + geom_point();
 ggplotly(pl)
 ```
 
+Okay let's get fancy. Let's plot a two variable standard Gaussian.
+```{r}
+x = seq(-3,3, length = 20)
+y = x
+f = function(x,y) { exp(-(x^2+y^2)/2)*(2*pi)^(0.5) }
+g = outer(x,y,f)
+contour(x,y,g)
+persp(x,y,g, theta = 30, phi = 10)
+```
+
+## Playing with a data set
+Let's load our library of datasets and examine one. First lets see the top of the table.
+```{r}
+library(ISLR)
+head(Auto)
+```
+
+Now the bottom:
+```{r}
+tail(Auto)
+```
+
+Now a summary:
+```{r}
+summary(Auto)
+```
+
+The basic shape:
+```{r}
+dim(Auto)
+```
+
+Other parts:
+```{r}
+colnames(Auto)
+rownames(Auto)
+```
+Let's examine the interactions further:
+```{r}
+plot(Auto$mpg, Auto$cylinders)
+```
+
+Hmm...it looks it thinks the cylinders are interpreted numerically, when certain values (7) can not happen. Let's fix this and try again:
+```{r}
+Auto$cylinders = as.factor(Auto$cylinders)
+plot(Auto$mpg ~ Auto$cylinders, legend.text =levels(Auto$cylinders))
+```
+
+Let's see how ggplot handles this:
+```{r}
+p <- ggplot(Auto, aes(x = cylinders, y = mpg)) + geom_boxplot()
+ggplotly(p)
+```
+
+Now a histogram:
+```{r}
+hist(Auto$mpg)
+```
+
+Now with ggplot
+```{r}
+p <- ggplot(Auto, aes(x = mpg))+geom_histogram(binwidth = 5)
+ggplotly(p)
+```
+
+Check pairs:
+```{r}
+pairs(Auto)
+```
+
+```{r}
+pairs(~ mpg + weight + horsepower, Auto)
+```
+
+Okay now the ggplot equivalent with GGally.
+```{r message = FALSE}
+library(GGally)
+ggpairs(Auto[,-9])
+p<- ggpairs(Auto[,c("mpg","weight","horsepower")])
+p
+ggplotly(p)
+```
+
+Looks like there is a roughly quadratic relation between mpg an d horsepower.
+```{r}
+plot(Auto$horsepower, Auto$mpg)
+```
+
+```{r}
+lm.fit=lm(mpg ~ poly(horsepower,2), data = Auto)
+summary(lm.fit)
+```
+
+
