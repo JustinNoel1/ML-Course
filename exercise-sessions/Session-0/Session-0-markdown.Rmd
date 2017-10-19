@@ -1,0 +1,42 @@
+---
+title: "Exercise Session 0"
+author: "Justin Noel"
+date: "10/19/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction to R
+
+R is a programming language designed for statistical computing. It is designed for working with data and has an extensive collection of libraries for this purpose. A huge part of the value of a particular programming language is the existing collection of libraries.
+
+I personally find R's programming syntax to be a bit strange, but I expect that we will learn to love it together. 
+
+### R as a calculator
+
+R is often run in interactive mode. This means that there is an interpreter running in a loop; it reads your command, executes, and then displays the output. This is much like a calculator. 
+
+In particular we can use R as a calculator:
+```{r}
+
+```
+
+### Data types
+
+
+```{r}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
