@@ -617,18 +617,28 @@ tiny = dtmfr %&gt;% select(-Author) %&gt;% select(new_order)
 tiny$Author = dtmfr$Author
 model &lt;- naiveBayes(Author ~ ., data = tiny[1:14579,])</code></pre>
 <p>Now let us test it against the validation data.</p>
-<p>We will check it on 10000 entries to assess the accuracy and then look at a truth table to see what kind of errors our classifier makes.</p>
+<p>We will check it on 5000 entries to assess the accuracy and then look at a truth table to see what kind of errors our classifier makes.</p>
+<pre class="r"><code>library(MLmetrics)</code></pre>
+<pre><code>## 
+## Attaching package: 'MLmetrics'</code></pre>
+<pre><code>## The following object is masked from 'package:base':
+## 
+##     Recall</code></pre>
 <pre class="r"><code>test &lt;- (tiny %&gt;% select(-Author))[14580:19579,]
 preds &lt;- predict(model, newdata = test)
-sum(preds == tiny$Author[14580:19579])</code></pre>
-<pre><code>## [1] 3047</code></pre>
+preds_p &lt;- 
+  predict(model, type = &quot;raw&quot;, newdata = test)
+sum(preds == tiny$Author[14580:19579])/5000</code></pre>
+<pre><code>## [1] 0.6094</code></pre>
+<pre class="r"><code>MultiLogLoss(preds_p, tiny$Author[14580:19579])</code></pre>
+<pre><code>## [1] 10.27673</code></pre>
 <pre class="r"><code>table(preds, tiny$Author[14580:19579])</code></pre>
 <pre><code>##      
 ## preds  EAP  HPL  MWS
 ##   EAP 1388  353  475
 ##   HPL  430  936  347
 ##   MWS  207  141  723</code></pre>
-<p>First the good news, 60.94% on a dataset is significantly better than randomly guessing (run a hypothesis test to check this). If we got a similar performance on the test set, then this submission would rate us 47th out of 227 entries as of the time of this writing.</p>
+<p>First the good news, 60.94% on a dataset is significantly better than randomly guessing (run a hypothesis test to check this). Our log loss is way below the public leader, which makes me think I have misread the rules.</p>
 <p>Let’s see how a logistic classifier would hold up;</p>
 <pre class="r"><code>library(nnet)
 model_lc &lt;- multinom(Author ~ ., data = tiny[1:14579,], MaxNWts = 3000)</code></pre>
@@ -1032,15 +1042,22 @@ model_lc &lt;- multinom(Author ~ ., data = tiny[1:14579,], MaxNWts = 3000)</code
 ## Residual Deviance: 21462.56 
 ## AIC: 23066.56</code></pre>
 <pre class="r"><code>preds_lc &lt;- predict(model_lc, type = &quot;class&quot;, newdata = test)
-sum(preds_lc == tiny$Author[14580:19579])</code></pre>
-<pre><code>## [1] 3265</code></pre>
+preds_lcp &lt;- predict(model_lc, type = &quot;probs&quot;, newdata = test)
+sum(preds_lc == tiny$Author[14580:19579])/5000</code></pre>
+<pre><code>## [1] 0.653</code></pre>
 <pre class="r"><code>table(preds_lc, tiny$Author[14580:19579])</code></pre>
 <pre><code>##         
 ## preds_lc  EAP  HPL  MWS
 ##      EAP 1518  437  447
 ##      HPL  245  835  186
 ##      MWS  262  158  912</code></pre>
-<p>Okay, so we ran this through a logistic classifier and now we got our accuracy up to 65.28%. Such a submission would get us into the top 20. Not bad for our second shot. Admittedly, it takes more and more effort to move up from here, but this looks like a reasonable track.</p>
+<pre class="r"><code>MultiLogLoss(preds_lcp, tiny$Author[14580:19579])</code></pre>
+<pre><code>## [1] 0.7857041</code></pre>
+<p>Okay, so we ran this through a logistic classifier and now we got our accuracy up to 65.28%. But our multiclass log loss increased. This seems to be because the NaiveBayesClassifier is extremely confident about its predictions. Not bad for our second shot. Admittedly, it takes more and more effort to move up from here, but this looks like a reasonable track.</p>
+<p>My suggestions: use more of the words. Use all of the training data. Maybe clean the data. If you are going to use a logistic classifier or a neural net, normalizing the data is a good idea. Add an unknown word marker to deal with new words.</p>
+<p>Of course, you still have to transform the testing data into the same format in order to submit.</p>
+<p>If you win, throw a party for the class :)</p>
+<p>You still have to figure out how to transform the testing data into acceptable input for this classifier.</p>
 </div>
 </div>
 

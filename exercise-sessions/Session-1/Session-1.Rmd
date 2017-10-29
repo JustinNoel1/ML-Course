@@ -261,14 +261,18 @@ model <- naiveBayes(Author ~ ., data = tiny[1:14579,])
 ```
 Now let us test it against the validation data. 
 
-We will check it on 10000 entries to assess the accuracy and then look at a truth table to see what kind of errors our classifier makes.
+We will check it on 5000 entries to assess the accuracy and then look at a truth table to see what kind of errors our classifier makes.
 ```{r}
+library(MLmetrics)
 test <- (tiny %>% select(-Author))[14580:19579,]
 preds <- predict(model, newdata = test)
-sum(preds == tiny$Author[14580:19579])
+preds_p <- 
+  predict(model, type = "raw", newdata = test)
+sum(preds == tiny$Author[14580:19579])/5000
+MultiLogLoss(preds_p, tiny$Author[14580:19579])
 table(preds, tiny$Author[14580:19579])
 ```
-First the good news, 60.94% on a dataset is significantly better than randomly guessing (run a hypothesis test to check this). If we got a similar performance on the test set, then this submission would rate us 47th out of 227 entries as of the time of this writing. 
+First the good news, 60.94% on a dataset is significantly better than randomly guessing (run a hypothesis test to check this). Our log loss is way below the public leader, which makes me think I have misread the rules.
 
 Let's see how a logistic classifier would hold up;
 ```{r}
@@ -276,11 +280,15 @@ library(nnet)
 model_lc <- multinom(Author ~ ., data = tiny[1:14579,], MaxNWts = 3000)
 summary(model_lc)
 preds_lc <- predict(model_lc, type = "class", newdata = test)
-sum(preds_lc == tiny$Author[14580:19579])
+preds_lcp <- predict(model_lc, type = "probs", newdata = test)
+sum(preds_lc == tiny$Author[14580:19579])/5000
 table(preds_lc, tiny$Author[14580:19579])
+MultiLogLoss(preds_lcp, tiny$Author[14580:19579])
 ```
 
-Okay, so we ran this through a logistic classifier and now we got our accuracy up to 65.28%. Such a submission would get us into the top 20. Not bad for our second shot. Admittedly, it takes more and more effort to move up from here, but this looks like a reasonable track. 
+Okay, so we ran this through a logistic classifier and now we got our accuracy up to 65.28%. But our multiclass log loss increased. This seems to be because the NaiveBayesClassifier is extremely confident about its predictions. 
+
+Not bad for our second shot. Admittedly, it takes more and more effort to move up from here, but this looks like a reasonable track. 
 
 My suggestions: use more of the words. Use all of the training data. Maybe clean the data. If you are going to use a logistic classifier or a neural net, normalizing the data is a good idea. Add an unknown word marker to deal with new words. 
 
