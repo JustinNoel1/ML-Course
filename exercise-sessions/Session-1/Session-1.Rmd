@@ -1,0 +1,299 @@
+---
+title: "Exercise Session 1"
+author: "Justin Noel"
+date: "10/27/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE, message = FALSE, error = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ISLR Exercise 8
+
+Although we could use the ISLR package. We will download the [dataset](http://www-bcf.usc.edu/~gareth/ISL/College.csv) into our local directory.
+
+```{r}
+download.file("http://www-bcf.usc.edu/~gareth/ISL/College.csv", "College.csv")
+```
+
+Load our data frame from the file.
+
+```{r}
+df <- read.csv("College.csv")
+```
+
+Let's look at it:
+```{r}
+head(df)
+```
+
+```{r}
+summary(df)
+```
+Uh oh. We can see that the college names have been converted into factors. This is not especially helpful. Let's make these into the names of the rows.
+```{r}
+rownames(df) <- df[,1]
+head(df)
+summary(df)
+```
+
+We are supposed to use the fix command. Let's see what that is.
+```{r}
+?fix
+```
+
+Okay, that was not especially helpful. Let's run it.
+```{r}
+fix(df)
+```
+
+I see. This gives me an incredibly ugly data frame editor.
+
+Okay let's get rid of the unneccessary column.
+```{r}
+df <- df[,-1]
+```
+
+Note that the "-1" here means that we will select all of the columns except the first one. This behavior is different from python where -1 will typically refer to the last column and -2 will refer to the second to last column.
+
+Let's see this in our ugly editor again.
+```{r}
+fix(df)
+```
+
+Okay, let's look at our cleaned data frame:
+```{r}
+summary(df)
+```
+
+Good, the unnecessary factor data is gone and apparently some school has an awful graduation rate.
+
+Which one is it?
+```{r}
+which.min(df$Grad.Rate)
+```
+Who is this culprit:
+```{r}
+df[586,]
+```
+
+Wow, we should avoid Texas Southern University.
+
+Now, let us look at a pairwise scatterplot of the first ten columns.
+```{r}
+pairs(df[,1:10])
+```
+That was ugly. Let's try this again.
+```{r message = FALSE, warnings = FALSE}
+library(GGally)
+ggpairs(df[,1:10])
+```
+
+Now let us construct a boxplot:
+```{r}
+library(ggplot2)
+ggplot(df, aes(y = Outstate, x = Private)) + geom_boxplot()
+```
+
+Okay, let us construct a new Elite feature which indicates if more than half of the students come from the top 10% of their class.
+First populate the entries.
+```{r}
+Elite = rep("No", nrow(df))
+```
+Mark the elite schools:
+```{r}
+Elite[df$Top10perc > 50]="Yes"
+```
+
+Make these strings factors:
+```{r}
+Elite=as.factor(Elite)
+```
+
+Add to our data frame.
+```{r}
+df$Elite = Elite
+colnames(df)
+```
+Okay check the new summary:
+```{r}
+summary(df)
+```
+
+Looks good. Now let us check out the out-of-state numbers for elite schools.
+```{r}
+ggplot(df, aes(x=Elite, y=Outstate)) + geom_boxplot()
+```
+
+Let us check this out side by side:
+```{r}
+p1 <- ggplot(df, aes(x = Private, y = Outstate)) + geom_boxplot()
+p2 <- ggplot(df, aes(x = Elite, y = Outstate)) + geom_boxplot()
+library(ggpubr)
+ggarrange(p1, p2)
+```
+Cool.
+
+Let's check out some more distributions.
+```{r}
+p1 <- ggplot(df, aes(x = Room.Board)) + geom_histogram(bins = 15)
+
+p2 <- ggplot(df, aes(x = PhD)) + geom_histogram(bins = 20)
+
+p3 <- ggplot(df, aes(x = Grad.Rate)) + geom_histogram(bins = 10)
+
+p4 <- ggplot(df, aes(x = Apps)) + geom_histogram(bins = 20)
+ggarrange(p1, p2, p3, p4, ncol = 2, nrow = 2)
+```
+
+Finally let's check out how many applications Elite schools get:
+```{r}
+ggplot(df, aes(x = Elite, y = Apps)) + geom_boxplot()
+```
+
+Wow, who is that outlier?
+
+```{r}
+df[which.max(df$Apps),]
+```
+
+What is going on there?
+
+### Some fun
+Let us clear our workspace.
+```{r}
+rm(list = ls())
+```
+
+Okay, I have grown a little tired of R's built in idioscyncracies. I am going to try and work in the tidyverse.
+
+Let us load a [spooky dataset](https://www.kaggle.com/c/spooky-author-identification):
+```{r}
+library(tidyverse)
+spooky <- read_csv("train.csv")
+head(spooky)
+```
+Okay let us clean this up.
+```{r}
+spooky = spooky[,-1]
+spooky$author <- as.factor(spooky$author)
+head(spooky)
+```
+We are going to manipulate some text, so let us load stringr (this is unnecessary after loading tidyverse).
+```{r}
+library(stringr)
+?stringr
+```
+
+Now let us check the use of punctuation.
+```{r}
+spooky$commas = str_count(spooky$text, ",")
+spooky$exclam = str_count(spooky$text, "!")
+spooky$quest = str_count(spooky$text, "\\?")
+```
+
+A summary:
+```{r}
+summary(spooky)
+```
+```{r}
+spooky %>% filter(commas == max(commas))
+```
+
+
+Okay so exclamation points are no help:
+```{r}
+spooky = spooky %>% select(-exclam)
+```
+
+
+```{r}
+ggpairs(spooky %>% select(-text))
+```
+
+```{r}
+library(tm)
+?Corpus
+corp <- Corpus(VectorSource(spooky$text))
+inspect(corp[[1]])
+```
+
+Okay clean the data.
+```{r}
+corp <- tm_map(corp, removePunctuation)
+inspect(corp[[1]])
+corp <- corp %>% 
+  tm_map(removeNumbers) %>% 
+  tm_map(stripWhitespace) %>% 
+  tm_map(tolower) %>%
+  tm_map(removeWords, stopwords("english")) %>%
+  tm_map(stemDocument)
+inspect(corp[[1]])
+```
+Create a document term matrix:
+```{r}
+dtm <- DocumentTermMatrix(corp)
+inspect(dtm[1:5,1:4])
+```
+```{r}
+dtmfr <- as_tibble(as.matrix(dtm))
+head(dtmfr)
+dtmfr$Author  = spooky$author
+```
+Wow using tibbles was much faster than dataframes.
+
+Now we will aggregate the data and get the most words that vary the most amongst the authors:
+```{r}
+counts <- dtmfr %>% group_by(Author) %>%
+  summarize_all(sum)
+ord = order(apply(select(counts,-Author), 2, var), decreasing = TRUE)[1:10] 
+counts %>% select(-Author) %>% select(ord)
+```
+
+Just for fun let us try a naive Bayes classifier. We need to shrink the data first to make this manageable. We will also set aside the last 5000 entries for validation. 
+```{r}
+library(e1071)
+new_order = order(apply(select(counts,-Author), 2, sum),decreasing = TRUE)[1:400]
+tiny = dtmfr %>% select(-Author) %>% select(new_order) 
+tiny$Author = dtmfr$Author
+model <- naiveBayes(Author ~ ., data = tiny[1:14579,])
+```
+Now let us test it against the validation data. 
+
+We will check it on 5000 entries to assess the accuracy and then look at a truth table to see what kind of errors our classifier makes.
+```{r}
+library(MLmetrics)
+test <- (tiny %>% select(-Author))[14580:19579,]
+preds <- predict(model, newdata = test)
+preds_p <- 
+  predict(model, type = "raw", newdata = test)
+sum(preds == tiny$Author[14580:19579])/5000
+MultiLogLoss(preds_p, tiny$Author[14580:19579])
+table(preds, tiny$Author[14580:19579])
+```
+First the good news, 60.94% on a dataset is significantly better than randomly guessing (run a hypothesis test to check this). Our log loss is way below the public leader, which makes me think I have misread the rules.
+
+Let's see how a logistic classifier would hold up;
+```{r}
+library(nnet)
+model_lc <- multinom(Author ~ ., data = tiny[1:14579,], MaxNWts = 3000)
+summary(model_lc)
+preds_lc <- predict(model_lc, type = "class", newdata = test)
+preds_lcp <- predict(model_lc, type = "probs", newdata = test)
+sum(preds_lc == tiny$Author[14580:19579])/5000
+table(preds_lc, tiny$Author[14580:19579])
+MultiLogLoss(preds_lcp, tiny$Author[14580:19579])
+```
+
+Okay, so we ran this through a logistic classifier and now we got our accuracy up to 65.28%. But our multiclass log loss increased. This seems to be because the NaiveBayesClassifier is extremely confident about its predictions. 
+
+Not bad for our second shot. Admittedly, it takes more and more effort to move up from here, but this looks like a reasonable track. 
+
+My suggestions: use more of the words. Use all of the training data. Maybe clean the data. If you are going to use a logistic classifier or a neural net, normalizing the data is a good idea. Add an unknown word marker to deal with new words. 
+
+Of course, you still have to transform the testing data into the same format in order to submit. 
+
+If you win, throw a party for the class :)
+
+You still have to figure out how to map the tes
