@@ -1,0 +1,90 @@
+---
+title: "Problem Session 2"
+author: "Justin Noel"
+date: "11/2/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Monte Carlo estimation of $\pi$
+
+Let's set our random seed:
+```{r}
+set.seed(42)
+```
+
+Let's write a function that takes in a number of iterations and returns a data frame with all of the relevant information for our Monte Carlo simulation.
+```{r}
+library(tidyverse)
+mc_pi = function(n) {
+  df = tibble(x = runif(n)*2-1, y = runif(n)*2-1)
+  df = df %>% mutate(r = x^2+y^2) %>%
+    mutate(incirc = ifelse(x^2+y^2 <= 1, 1, 0)) %>%
+    mutate(perc_inside = cummean(incirc)) %>%
+    mutate(pi_est = perc_inside*4) %>%
+    mutate(err = pi-pi_est) %>%
+    mutate(abs_err = abs(err))
+  return(df)
+}
+
+```
+
+Test this out:
+```{r}
+test = mc_pi(10^6)
+tail(test$pi_est)
+```
+
+Graph our error:
+```{r}
+test %>% slice(seq(1,length(test$y),1000)) %>% 
+  ggplot() + geom_point(aes(x=1:length(x), y=abs_err), size = 0.1) + scale_y_log10() + xlab("Iteration") + ylab("Log error")
+```
+### Kaggle example
+Load our data:
+```{r}
+hr = read_csv("HR_comma_sep.csv")
+```
+Label factors:
+```{r}
+hr = hr %>% mutate(number_project = ordered(number_project)) %>%
+  mutate(time_spend_company = ordered(time_spend_company)) %>%
+  mutate(work_accident = factor(Work_accident)) %>%
+  mutate(left = factor(left)) %>%
+  mutate(sales = factor(sales)) %>%
+  mutate(salary = factor(salary))
+```
+
+Drop the extra column with inconsistent naming:
+```{r}
+hr = hr %>% select(-Work_accident)
+```
+Let's shuffle the dataframe:
+```{r}
+sh_hr = slice(hr, sample(nrow(hr), replace = FALSE))
+head(hr[1:3])
+head(sh_hr[1:3])
+```
+Split the dataset:
+```{r}
+hr_train = slice(sh_hr,1:10000)
+hr_test = slice(sh_hr, seq(10001, nrow(sh_hr)))
+```
+
+Examine some summary statistics:
+```{r}
+summary(hr_train)
+
+```
+```{r}
+library(GGally)
+prs = ggpairs(hr_train) 
+ggsave("pairs.pdf", prs)
+```
+```{r}
+ggplot(hr_train, left ~ .)
+```
+
