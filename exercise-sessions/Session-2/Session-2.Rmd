@@ -85,6 +85,82 @@ prs = ggpairs(hr_train)
 ggsave("pairs.pdf", prs)
 ```
 ```{r}
-ggplot(hr_train, left ~ .)
+ggplot(hr_train, aes(x = left, y = satisfaction_level)) + geom_boxplot()
+
+```
+Okay, no big surprise here, most of the people who left had low satisfaction levels.
+
+Were they over or underworked?
+```{r}
+hr_train$number_project = as.integer(hr_train$number_project)
+ggplot(hr_train, aes(x=left, y=number_project)) + geom_boxplot()
+```
+How were the evaluations?
+```{r}
+ggplot(hr_train, aes(x=left, y=last_evaluation)) +geom_boxplot()
+```
+Okay let's see if we can find those who are leaving. What percentage have left?
+```{r}
+mean(hr_train$left==1)
+```
+Let's construct some new features.
+```{r}
+hr_train = hr_train %>% mutate(unhappy = satisfaction_level < 0.5, overworked = number_project > 3, underappreciated = last_evaluation < 0.6)
+hr_test = hr_test %>% mutate(unhappy = satisfaction_level < 0.5, overworked = number_project > 3, underappreciated = last_evaluation < 0.6)
+```
+
+Make a hypothesis:
+```{r}
+hr_train = hr_train %>% mutate(prob_quit = unhappy | (overworked & underappreciated))
+hr_test = hr_test %>% mutate(prob_quit = unhappy | (overworked & underappreciated))
+```
+How did we do on the training set?
+```{r}
+sum(as.integer(hr_train$prob_quit) == hr_train$left)
+```
+So that is a 76.41% correct prediction rate. Note that this this is not good:
+```{r}
+sum(0 == hr_train$left)
+```
+Let's try again:
+```{r}
+hr_train = hr_train %>% mutate(prob_quit = unhappy & (overworked))
+hr_test = hr_test %>% mutate(prob_quit = unhappy & (overworked))
+sum(as.integer(hr_train$prob_quit) == hr_train$left)
+```
+Slightly better, but that is nothing to write home about. 
+
+Let's try something better.
+```{r}
+library(rpart)
+hr_train = select(hr_train, -overworked-unhappy-underappreciated)
+tree.fit = rpart(left~., data=hr_train, control = rpart.control(maxdepth = 5))
+summary(tree.fit)
+```
+This is hard to read.
+```{r}
+library(rpart.plot)
+rpart.plot(tree.fit)
+
+```
+Okay, so what is our error rate?
+```{r}
+hr_test$number_project = as.integer(hr_test$number_project)
+preds = predict(tree.fit, hr_test, type = "class")
+mean(hr_test$left == preds)
+```
+That's more like it!
+
+Can we do even better?
+```{r}
+library(xgboost)
+matdata = as.matrix(sapply(select(hr_train,-left), as.numeric))
+mattest = as.matrix(sapply(select(hr_test,-left), as.numeric))
+watchlist = list(train=matdata, test = mattest)
+btree.fit = xgb.train(data =matdata, label = hr_train$left, max.depth = 2, nrounds = 200, watchlist = watchlist)
+```
+```{r}
+bpreds = predict(btree.fit, mattest)
+mean(as.integer(hr_test$left) == (bpreds >0.5))
 ```
 
