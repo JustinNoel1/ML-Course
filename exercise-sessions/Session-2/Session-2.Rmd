@@ -5,18 +5,20 @@ date: "11/2/2017"
 output: html_document
 ---
 
-```{r setup, include=FALSE, message = FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+```{r setup, include=FALSE, message = FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = T, message = F, warning = F)
 ```
 
 ## Monte Carlo estimation of $\pi$
 
 Let's set our random seed:
+
 ```{r}
 set.seed(42)
 ```
 
 Let's write a function that takes in a number of iterations and returns a data frame with all of the relevant information for our Monte Carlo simulation.
+
 ```{r}
 library(tidyverse)
 mc_pi = function(n) {
@@ -43,11 +45,15 @@ Graph our error:
 test %>% slice(seq(1,length(test$y),1000)) %>% 
   ggplot() + geom_point(aes(x=1:length(x), y=abs_err), size = 0.1) + scale_y_log10() + xlab("Iteration") + ylab("Log error")
 ```
-### Kaggle example
+
+## Kaggle example
+
 Load our data:
+
 ```{r}
 hr = read_csv("HR_comma_sep.csv")
 ```
+
 Label factors:
 ```{r}
 hr = hr %>% mutate(number_project = ordered(number_project)) %>%
@@ -62,19 +68,23 @@ Drop the extra column with inconsistent naming:
 ```{r}
 hr = hr %>% select(-Work_accident)
 ```
+
 Let's shuffle the dataframe:
 ```{r}
 sh_hr = slice(hr, sample(nrow(hr), replace = FALSE))
 head(hr[1:3])
 head(sh_hr[1:3])
 ```
+
 Split the dataset:
+
 ```{r}
 hr_train = slice(sh_hr,1:10000)
 hr_test = slice(sh_hr, seq(10001, nrow(sh_hr)))
 ```
 
 Examine some summary statistics:
+
 ```{r}
 summary(hr_train)
 
@@ -88,9 +98,11 @@ ggsave("pairs.pdf", prs)
 ggplot(hr_train, aes(x = left, y = satisfaction_level)) + geom_boxplot()
 
 ```
+
 Okay, no big surprise here, most of the people who left had low satisfaction levels.
 
 Were they over or underworked?
+
 ```{r}
 hr_train$number_project = as.integer(hr_train$number_project)
 ggplot(hr_train, aes(x=left, y=number_project)) + geom_boxplot()
@@ -110,11 +122,13 @@ hr_test = hr_test %>% mutate(unhappy = satisfaction_level < 0.5, overworked = nu
 ```
 
 Make a hypothesis:
+
 ```{r}
 hr_train = hr_train %>% mutate(prob_quit = unhappy | (overworked & underappreciated))
 hr_test = hr_test %>% mutate(prob_quit = unhappy | (overworked & underappreciated))
 ```
 How did we do on the training set?
+
 ```{r}
 sum(as.integer(hr_train$prob_quit) == hr_train$left)
 ```
@@ -123,6 +137,7 @@ So that is a 76.41% correct prediction rate. Note that this this is not good:
 sum(0 == hr_train$left)
 ```
 Let's try again:
+
 ```{r}
 hr_train = hr_train %>% mutate(prob_quit = unhappy & (overworked))
 hr_test = hr_test %>% mutate(prob_quit = unhappy & (overworked))
@@ -131,6 +146,7 @@ sum(as.integer(hr_train$prob_quit) == hr_train$left)
 Slightly better, but that is nothing to write home about. 
 
 Let's try something better.
+
 ```{r}
 library(rpart)
 hr_train = select(hr_train, -overworked-unhappy-underappreciated)
@@ -143,7 +159,9 @@ library(rpart.plot)
 rpart.plot(tree.fit)
 
 ```
+
 Okay, so what is our error rate?
+
 ```{r}
 hr_test$number_project = as.integer(hr_test$number_project)
 preds = predict(tree.fit, hr_test, type = "class")
@@ -154,13 +172,16 @@ That's more like it!
 Can we do even better?
 ```{r}
 library(xgboost)
-matdata = as.matrix(sapply(select(hr_train,-left), as.numeric))
-mattest = as.matrix(sapply(select(hr_test,-left), as.numeric))
+matdata = xgb.DMatrix(data = as.matrix(sapply(select(hr_train,-left), as.numeric)), label =as.numeric( hr_train$left)-1)
+mattest = xgb.DMatrix(data = as.matrix(sapply(select(hr_test,-left), as.numeric)), label = as.numeric(hr_test$left)-1)
 watchlist = list(train=matdata, test = mattest)
-btree.fit = xgb.train(data =matdata, label = hr_train$left, max.depth = 2, nrounds = 200, watchlist = watchlist)
-```
-```{r}
-bpreds = predict(btree.fit, mattest)
-mean(as.integer(hr_test$left) == (bpreds >0.5))
+btree.fit = xgb.train(data = matdata, label = hr_train$left, max.depth = 5, eval.metric="error", nrounds = 200, watchlist = watchlist)
 ```
 
+```{r}
+bpreds = predict(btree.fit, mattest)
+head(bpreds)
+mean(as.integer(hr_test$left)-1 == (bpreds >0.5))
+```
+
+That brings our accuracy up to 98.46%. This is something to write home about.
