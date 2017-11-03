@@ -8,6 +8,10 @@ output: html_document
 ```{r setup, include=FALSE, message = FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = T, message = F, warning = F)
 ```
+## Exercises
+
+### Exercise 1
+1. Test
 
 ## Monte Carlo estimation of $\pi$
 
