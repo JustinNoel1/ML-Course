@@ -1,0 +1,206 @@
+---
+title: "Problem Session 2"
+author: "Justin Noel"
+date: "11/2/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE, message = FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = T, message = F, warning = F)
+```
+## Exercises
+From [Problem Set 2](http://www.nullplug.org/ML-Blog/2017/10/27/problem-set-2/).
+
+### Exercise 1
+
+1.
+  a. 2/3
+  b. 1/2
+2. 
+  a. Prosecutor says $P(BT(z)=x|NotGuilty(z))= P(BT(z)=x, NotGuilty(z))/P(NotGuilty(z)) = 0.01$, but we are given P(BT(z)=x)=0.01. Then goes onto conclude P(Guilty(z)|BT(z)=x)=1-P(BT(z)=x|NotGuilty(z))$ and there is no such relation. 
+ $$\sum_{z, BT(z)=x} P(Guilty(z) | BT(z)=x) =1,$$ but the prosecutor's argument applies to each of these yielding a sum that is greater than 
+ 1. 
+  b. Assuming the killer is from the population. The defender's argument holds if the police chose the defendant uniformly at random from the subpopulation with the specified bloodtype. Under the reasonable, but unstated assumption, that the police chose the defendant out of a smaller population without regard to the blood type this argument is false. 
+3. $P(T=P|D=P)=0.99$, and $P(T=N|D=N)=0.99$ and $P(D=P)=10^-4$. $$P(D=P|T=P) = \frac{P(T=P|D=P)P(D=P)}{P(T=P)} = \frac{P(T=P|D=P)P(D=P)}{P(T=P|D=P)P(D=P)+(1-P(T=N|D=N))(1-P(D=P))}.$$
+This yields $0.009803921568627442$. 
+4. 
+  a. $P(H|e_1,e_2)=\frac{P(e_1,e_2|H)P(H)}{P(e_1,e_2)} so ii. is sufficient. I believe the first is not, but I don't have a counterexample. If it isn't the third is not sufficent, because it includes strictly less information. 
+  b. Assuming $P(e_1,e_2|H)=P(e_1|H)P(e_2|H)$. And $P(e_1,e_2)=\sum_{H=Z} P(e_1,e_2|Z)$ so we can derive the probabilities in ii from those in iii (and therefore also i). So all three are sufficient.
+  
+
+## Monte Carlo estimation of $\pi$
+
+Let's set our random seed:
+
+```{r}
+set.seed(42)
+```
+
+Let's write a function that takes in a number of iterations and returns a data frame with all of the relevant information for our Monte Carlo simulation.
+
+```{r}
+library(tidyverse)
+mc_pi = function(n) {
+  df = tibble(x = runif(n)*2-1, y = runif(n)*2-1)
+  df = df %>% mutate(r = x^2+y^2) %>%
+    mutate(incirc = ifelse(x^2+y^2 <= 1, 1, 0)) %>%
+    mutate(perc_inside = cummean(incirc)) %>%
+    mutate(pi_est = perc_inside*4) %>%
+    mutate(err = pi-pi_est) %>%
+    mutate(abs_err = abs(err))
+  return(df)
+}
+
+```
+
+Test this out:
+```{r}
+test = mc_pi(10^6)
+tail(test$pi_est)
+```
+
+Graph our error:
+```{r}
+test %>% slice(seq(1,length(test$y),1000)) %>% 
+  ggplot() + geom_point(aes(x=1:length(x), y=abs_err), size = 0.1) + scale_y_log10() + xlab("Iteration") + ylab("Log error")
+```
+
+## Kaggle example
+
+Load our data:
+
+```{r}
+hr = read_csv("HR_comma_sep.csv")
+```
+
+Label factors:
+```{r}
+hr = hr %>% mutate(number_project = ordered(number_project)) %>%
+  mutate(time_spend_company = ordered(time_spend_company)) %>%
+  mutate(work_accident = factor(Work_accident)) %>%
+  mutate(left = factor(left)) %>%
+  mutate(sales = factor(sales)) %>%
+  mutate(salary = factor(salary))
+```
+
+Drop the extra column with inconsistent naming:
+```{r}
+hr = hr %>% select(-Work_accident)
+```
+
+Let's shuffle the dataframe:
+```{r}
+sh_hr = slice(hr, sample(nrow(hr), replace = FALSE))
+head(hr[1:3])
+head(sh_hr[1:3])
+```
+
+Split the dataset:
+
+```{r}
+hr_train = slice(sh_hr,1:10000)
+hr_test = slice(sh_hr, seq(10001, nrow(sh_hr)))
+```
+
+Examine some summary statistics:
+
+```{r}
+summary(hr_train)
+```
+```{r}
+library(GGally)
+prs = ggpairs(hr_train) 
+prs
+ggsave("pairs.pdf", prs)
+```
+```{r}
+ggplot(hr_train, aes(x = left, y = satisfaction_level)) + geom_boxplot()
+
+```
+
+Okay, no big surprise here, most of the people who left had low satisfaction levels.
+
+Were they over or underworked?
+
+```{r}
+hr_train$number_project = as.integer(hr_train$number_project)
+ggplot(hr_train, aes(x=left, y=number_project)) + geom_boxplot()
+```
+How were the evaluations?
+```{r}
+ggplot(hr_train, aes(x=left, y=last_evaluation)) +geom_boxplot()
+```
+Okay let's see if we can find those who are leaving. What percentage have left?
+```{r}
+mean(hr_train$left==1)
+```
+Let's construct some new features.
+```{r}
+hr_train = hr_train %>% mutate(unhappy = satisfaction_level < 0.5, overworked = number_project > 3, underappreciated = last_evaluation < 0.6)
+hr_test = hr_test %>% mutate(unhappy = satisfaction_level < 0.5, overworked = number_project > 3, underappreciated = last_evaluation < 0.6)
+```
+
+Make a hypothesis:
+
+```{r}
+hr_train = hr_train %>% mutate(prob_quit = unhappy | (overworked & underappreciated))
+hr_test = hr_test %>% mutate(prob_quit = unhappy | (overworked & underappreciated))
+```
+How did we do on the training set?
+
+```{r}
+sum(as.integer(hr_train$prob_quit) == hr_train$left)
+```
+So that is a 76.24% correct prediction rate. Note that this this is not good:
+```{r}
+sum(0 == hr_train$left)
+```
+Let's try again:
+
+```{r}
+hr_train = hr_train %>% mutate(prob_quit = unhappy & (overworked))
+hr_test = hr_test %>% mutate(prob_quit = unhappy & (overworked))
+sum(as.integer(hr_train$prob_quit) == hr_train$left)
+```
+Slightly better, but that is nothing to write home about. 
+
+Let's try something better.
+
+```{r}
+library(rpart)
+hr_train = select(hr_train, -unhappy) %>% select(-prob_quit) %>% select(-overworked) %>% select(-underappreciated)
+tree.fit = rpart(left~., data=hr_train, control = rpart.control(maxdepth = 30))
+summary(tree.fit)
+```
+This is hard to read.
+```{r}
+library(rpart.plot)
+rpart.plot(tree.fit)
+
+```
+
+Okay, so what is our error rate?
+
+```{r}
+hr_test$number_project = as.integer(hr_test$number_project)
+preds = predict(tree.fit, hr_test, type = "class")
+mean(hr_test$left == preds)
+```
+That's more like it!
+
+Can we do even better?
+```{r}
+library(xgboost)
+matdata = xgb.DMatrix(data = as.matrix(sapply(select(hr_train,-left), as.numeric)), label =as.numeric( hr_train$left)-1)
+mattest = xgb.DMatrix(data = as.matrix(sapply(select(hr_test,-left), as.numeric)), label = as.numeric(hr_test$left)-1)
+watchlist = list(train=matdata, test = mattest)
+btree.fit = xgb.train(data = matdata, label = hr_train$left, max.depth = 30, eval.metric="error", nrounds = 200, watchlist = watchlist)
+```
+
+```{r}
+bpreds = predict(btree.fit, mattest)
+head(bpreds)
+mean(as.integer(hr_test$left)-1 == (bpreds >0.5))
+```
+
+That brings our accuracy up to 98.44%. This is something to write home  about.
