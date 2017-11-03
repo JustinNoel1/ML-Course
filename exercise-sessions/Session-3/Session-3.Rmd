@@ -1,0 +1,76 @@
+---
+title: "Problem Session 3"
+author: "Justin Noel"
+date: "11/3/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, include = TRUE, warning = FALSE)
+```
+
+## Exercises
+From [Problem Set 3](http://www.nullplug.org/ML-Blog/2017/11/03/problem-set-3/).
+
+### R Lab
+
+Let's load our datasets:
+```{r}
+library(tidyverse)
+tr_tbl = read_csv("train.csv")
+test_tbl = read_csv("test.csv")
+all_text = c(tr_tbl$text, test_tbl$text)
+```
+Let's make a dfm:
+```{r}
+library(quanteda)
+corp = corpus(all_text)
+all_dfm = dfm(corp, remove = stopwords("english"), stem = T, remove_punct = T, remove_numbers = T)
+all_dfm_trm = dfm_trim(all_dfm, min_count = 10, max_count = 200, verbose = T)
+
+```
+
+Transform the counts into binary counts.
+```{r}
+all_dfm_trm_b = tf(all_dfm_trm, scheme="boolean")
+```
+Build our train and validation data frames.
+```{r}
+train_df = as.tibble(as.data.frame(all_dfm_trm_b[1:length(tr_tbl$author)]))
+train_df$author = tr_tbl$author
+library(caret)
+train_ix = createDataPartition(train_df$author, p = 0.8, list = F, times = 1)
+train = slice(train_df,train_ix)
+valid = slice(train_df, -train_ix)
+```
+Construct our model. For numerical stability reasons I will use the logarithm of the smoothed possibilities for the weights.
+```{r}
+smoother = function(x) { return( log( (sum(x)+1)/(length(x)+2)) )}
+
+ber_model = train %>% group_by(author) %>%
+  summarize_all(funs(smoother))
+```
+
+Now let us run the model:
+```{r}
+log_probs = as.matrix(select(ber_model,-author)) %*% t(as.matrix(select(valid,-author)))
+log_part = apply(log_probs,2,function(x){log(sum(exp(x)))})
+log_part = matrix(c(log_part,log_part,log_part),nrow = 3, byrow = TRUE)
+log_probs = log_probs - log_part
+preds = apply(log_probs, 2, function(x){return(ber_model$author[which.max(x)])})
+
+```
+Calculate the accuracy of our model:
+```{r}
+mean(preds == slice(train_df, -train_ix)$author)
+```
+Not too bad.
+
+Let's calculate the average negative log loss; for this we will use the so-called one-hot encoding matrix:
+```{r}
+val_labels = slice(train_df,-train_ix) %>%
+  select(author)
+val_matrix = t(model.matrix(~author -1, data = val_labels))
+-sum(val_matrix*log_probs)/length(val_labels$author)
+```
+That is just barely good enough to hit the 65th percentile in this Kaggle competition as of the time of this writing. Not great, but still it is nice to see this all work explicitly.
