@@ -137,7 +137,7 @@ all_text = c(tr_tbl$text, test_tbl$text)</code></pre>
 <pre class="r"><code>library(quanteda)
 corp = corpus(all_text)
 all_dfm = dfm(corp, remove = stopwords(&quot;english&quot;), stem = T, remove_punct = T, remove_numbers = T)
-all_dfm_trm = dfm_trim(all_dfm, min_count = 10, max_count = 200, verbose = T)</code></pre>
+all_dfm_trm = dfm_trim(all_dfm, min_count = 5, max_count = 1000, verbose = T)</code></pre>
 <p>Transform the counts into binary counts.</p>
 <pre class="r"><code>all_dfm_trm_b = tf(all_dfm_trm, scheme=&quot;boolean&quot;)</code></pre>
 <p>Build our train and validation data frames.</p>
@@ -148,27 +148,41 @@ train_ix = createDataPartition(train_df$author, p = 0.8, list = F, times = 1)
 train = slice(train_df,train_ix)
 valid = slice(train_df, -train_ix)</code></pre>
 <p>Construct our model. For numerical stability reasons I will use the logarithm of the smoothed possibilities for the weights.</p>
-<pre class="r"><code>smoother = function(x) { return( log( (sum(x)+1)/(length(x)+2)) )}
+<p>I apologize for the terrible code here. For whatever reason, using the “length” command instead of the “n” command in normalizing the data is incredibly slow once the number of features gets large (the code would not complete on my laptop. So the simple code had to be replaced with a much more convoluted block which does the same thing, but somehow is fast enough to execute.</p>
+<pre class="r"><code># This more readable code runs 35 times slower than the mess that follows it.
+#smoother = function(x) { return( log( (sum(x)+1)/(length(x)+2)) )}
+#system.time({ber_model = train %&gt;% group_by(author) %&gt;% summarize_all(.funs = smoother)})
 
-ber_model = train %&gt;% group_by(author) %&gt;%
-  summarize_all(funs(smoother))</code></pre>
+# I need to recover the size of the groups
+# Turn the means into sums
+# Add one to all entries for smoothing
+# Divide by the size of each group + 2 (for smoothing)
+system.time({ber_model &lt;- train %&gt;% group_by(author) %&gt;% mutate(sz = n()) %&gt;% summarize_all(.funs = mean)
+ber_mode_mat = diag(ber_model$sz) %*% as.matrix(select(ber_model,-author,-sz))
+ber_mode_mat2 = ber_mode_mat+matrix(data = rep.int(1,prod(dim(ber_mode_mat))),nrow = nrow(ber_mode_mat))
+ber_mode_mat3 =  diag(map(ber_model$sz, ~1/(.+2))) %*% ber_mode_mat2 })</code></pre>
+<pre><code>##    user  system elapsed 
+##  13.564   0.281  13.930</code></pre>
 <p>Now let us run the model:</p>
-<pre class="r"><code>log_probs = as.matrix(select(ber_model,-author)) %*% t(as.matrix(select(valid,-author)))
+<pre class="r"><code>#log_probs = as.matrix(select(ber_model,-author)) %*% t(as.matrix(select(valid,-author)))
+#get 
+log_probs = log(ber_mode_mat3) %*% t(as.matrix(select(valid,-author)))
+log_probs = apply(log_probs, c(1,2), function(n) max(n,-500))
 log_part = apply(log_probs,2,function(x){log(sum(exp(x)))})
-log_part = matrix(c(log_part,log_part,log_part),nrow = 3, byrow = TRUE)
+log_part = matrix(rep(log_part,3),nrow = 3, byrow = TRUE)
 log_probs = log_probs - log_part
 preds = apply(log_probs, 2, function(x){return(ber_model$author[which.max(x)])})</code></pre>
 <p>Calculate the accuracy of our model:</p>
 <pre class="r"><code>mean(preds == slice(train_df, -train_ix)$author)</code></pre>
-<pre><code>## [1] 0.7565773</code></pre>
+<pre><code>## [1] 0.7800766</code></pre>
 <p>Not too bad.</p>
 <p>Let’s calculate the average negative log loss; for this we will use the so-called one-hot encoding matrix:</p>
 <pre class="r"><code>val_labels = slice(train_df,-train_ix) %&gt;%
   select(author)
 val_matrix = t(model.matrix(~author -1, data = val_labels))
 -sum(val_matrix*log_probs)/length(val_labels$author)</code></pre>
-<pre><code>## [1] 0.6033301</code></pre>
-<p>That is just barely good enough to hit the 65th percentile in this Kaggle competition as of the time of this writing. Not great, but still it is nice to see this all work explicitly.</p>
+<pre><code>## [1] 0.596706</code></pre>
+<p>That is just barely good enough to hit the 68th percentile in this Kaggle competition as of the time of this writing. Not great, but still it is nice to see this all work explicitly.</p>
 </div>
 </div>
 
