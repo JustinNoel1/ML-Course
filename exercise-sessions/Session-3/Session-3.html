@@ -125,7 +125,35 @@ $(document).ready(function () {
 
 <div id="exercises" class="section level2">
 <h2>Exercises</h2>
-<p>From <a href="http://www.nullplug.org/ML-Blog/2017/11/03/problem-set-3/">Problem Set 3</a>.</p>
+<p>From <a href="http://www.nullplug.org/ML-Blog/2017/11/03/problem-set-3/">Problem Set 3</a></p>
+<div id="mle-for-uniform-distribution" class="section level3">
+<h3>MLE for uniform distribution</h3>
+<ol style="list-style-type: decimal">
+<li><span class="math inline">\(p(x)=\chi_{[-a,a]}/2a\)</span></li>
+</ol>
+<ol style="list-style-type: lower-alpha">
+<li>Now we are given dataset <span class="math inline">\(x_1,\dots, x_n\)</span>. <span class="math display">\[L(a)=p(x_1,\dots,x_n|a)=\prod_{i=1}^n p(x_i|a)=\prod_{i=1}^n\chi_{[-a,a]}(x_i)/2a.\]</span> If one of the <span class="math inline">\(|x_i|&gt;a\)</span> then this product is zero, so this term will only be non-zero if <span class="math inline">\(a\geq \max(|x_i|)\)</span> In this case <span class="math inline">\(L(a)=1/(2a)^n\)</span>. This is a decreasing function of <span class="math inline">\(a\)</span> and hence is maximized at the minimum allowable value <span class="math inline">\(a=\max(|x_i|)=M\)</span>.</li>
+<li>What is the probability this model would assign to a new data point <span class="math inline">\(x\)</span>? <span class="math inline">\(p(x|M)=1/(2M)\)</span> if <span class="math inline">\(|x|\leq M\)</span> otherwise it is 0.</li>
+<li>This is not especially reasonable if there is any reason to expect that a datapoint could be larger in magnitude than those that preceded. One way to handle this is to be Bayesian and choose the uninformative improper prior <span class="math inline">\(p(a)=1.\)</span> This is <em>improper</em> which means it does not integrate to 1 (the integral is infinite), but in the presence of at least <span class="math inline">\(2\)</span> data points this yields a posterior distribution which is proper. If we use this new posterior distribution <span class="math inline">\(p'(a)\)</span> and calculuate <span class="math inline">\(p(x)=\int p(x|a)p'(a)da\)</span> then we obtain non-zero values.</li>
+</ol>
+</div>
+<div id="point-estimates-for-beta-distriubtion." class="section level3">
+<h3>Point estimates for Beta distriubtion.</h3>
+<ol style="list-style-type: decimal">
+<li><ol style="list-style-type: lower-alpha">
+<li>The expected value is <span class="math display">\[\int_0^1 \Gamma(\alpha+\beta)/(\Gamma(\alpha)\Gamma(\beta)) \theta^\alpha (1-\theta)^{\beta-1}d\theta.\]</span> Now <span class="math inline">\(\theta^{\alpha}(1-\theta)^{\beta-1}\)</span> is proportional to the pdf for Beta<span class="math inline">\((\alpha+1,\beta)\)</span>. So the integral of this term has to be the multiplicative inverse of the missing constant so that the Beta distribution integrates to 1. The missing constant is <span class="math inline">\(\Gamma(\alpha+\beta+1)/(\Gamma(\alpha+1)\Gamma(\beta)).\)</span> Forming the quotient and using the equation <span class="math inline">\(\Gamma(x+1)=x\Gamma(x)\)</span> one gets that the expected value is <span class="math inline">\(\alpha/(\alpha+\beta)\)</span>.</li>
+</ol></li>
+</ol>
+<p>For the mode, one sets the derivative to 0 andwe get that the extreme point is at <span class="math inline">\(\theta=(\alpha-1)/(\alpha+\beta-2)\)</span> (if <span class="math inline">\(\alpha+\beta\neq 2\)</span>). If <span class="math inline">\(\alpha\)</span> or <span class="math inline">\(\beta\)</span> ie less than 1, than this distribution has no maximum on <span class="math inline">\((0,1)\)</span> because it is unbounded. Otherwise, this is indeed the maximum, by a tedious second derivative calculation.</p>
+</div>
+<div id="change-of-variables" class="section level3">
+<h3>Change of variables</h3>
+<ol style="list-style-type: decimal">
+<li>We get <span class="math inline">\(p_{Y\circ X}(t)=P(Y\circ X=t)=\sum_{z\in Y^{-1}(t)} p_x(z)\)</span>.</li>
+<li>These are independent terms so <span class="math display">\[p_{X^n}(v_1,\dots,v_n)=\prod p_X(v_i)=\prod \theta^{v_i}(1-\theta)^{1-v_i}\]</span> and this is <span class="math display">\[\theta^{\sum v_i}(1-\theta)^{n-\sum v_i}.\]</span> The next part is a simple application of the previous step and we obtain <span class="math display">\[p_{\sigma\circ X^n}(k)=n!/(k!(n-k)!)\theta^{k}(1-\theta)^{n-k}.\]</span></li>
+<li>The composite of a measurable function <span class="math inline">\(X\)</span> with a continuous function <span class="math inline">\(Y\)</span> to <span class="math inline">\(\Bbb R\)</span> is measurable because it is neccessary and sufficient to check that the preimage of an open subset of <span class="math inline">\(\Bbb R\)</span> is measurable, but because <span class="math inline">\(Y\)</span> is continuous the preimage of an open subset of <span class="math inline">\(\Bbb R\)</span> is an open subset of <span class="math inline">\(\Bbb R\)</span>. Then the assumption that <span class="math inline">\(X\)</span> is m</li>
+</ol>
+</div>
 <div id="r-lab" class="section level3">
 <h3>R Lab</h3>
 <p>Let’s load our datasets:</p>
@@ -162,7 +190,7 @@ ber_mode_mat = diag(ber_model$sz) %*% as.matrix(select(ber_model,-author,-sz))
 ber_mode_mat2 = ber_mode_mat+matrix(data = rep.int(1,prod(dim(ber_mode_mat))),nrow = nrow(ber_mode_mat))
 ber_mode_mat3 =  diag(map(ber_model$sz, ~1/(.+2))) %*% ber_mode_mat2 })</code></pre>
 <pre><code>##    user  system elapsed 
-##  13.564   0.281  13.930</code></pre>
+##  13.788   0.262  14.085</code></pre>
 <p>Now let us run the model:</p>
 <pre class="r"><code>#log_probs = as.matrix(select(ber_model,-author)) %*% t(as.matrix(select(valid,-author)))
 #get 
@@ -173,15 +201,15 @@ log_part = matrix(rep(log_part,3),nrow = 3, byrow = TRUE)
 log_probs = log_probs - log_part
 preds = apply(log_probs, 2, function(x){return(ber_model$author[which.max(x)])})</code></pre>
 <p>Calculate the accuracy of our model:</p>
-<pre class="r"><code>mean(preds == slice(train_df, -train_ix)$author)</code></pre>
-<pre><code>## [1] 0.7800766</code></pre>
+<pre class="r"><code>mean(preds == valid$author)</code></pre>
+<pre><code>## [1] 0.7864623</code></pre>
 <p>Not too bad.</p>
 <p>Let’s calculate the average negative log loss; for this we will use the so-called one-hot encoding matrix:</p>
 <pre class="r"><code>val_labels = slice(train_df,-train_ix) %&gt;%
   select(author)
 val_matrix = t(model.matrix(~author -1, data = val_labels))
 -sum(val_matrix*log_probs)/length(val_labels$author)</code></pre>
-<pre><code>## [1] 0.596706</code></pre>
+<pre><code>## [1] 0.615375</code></pre>
 <p>That is just barely good enough to hit the 68th percentile in this Kaggle competition as of the time of this writing. Not great, but still it is nice to see this all work explicitly.</p>
 </div>
 </div>
