@@ -55,11 +55,13 @@ xbias = as.matrix(cbind(1, x))
 y = 2*x-1+rnorm(l)*variance
 lf = linreg(xbias, y)
 ```
+
 Plot
 ```{r}
 library(ggplot2)
 ggplot()+geom_point(aes(x=x, y=y), color = 'purple', alpha = 0.4) + geom_line(aes(x=x, y=lf(xbias)), color = 'blue', size =1) + geom_line(aes(x=x, y=2*x-1), color = 'green', size = 1, alpha = 0.5)
 ```
+
 Okay that worked.
 
 Next:
@@ -83,6 +85,7 @@ Plot:
 ```{r}
 ggplot()+geom_point(aes(x=x, y=y), color = 'purple', alpha = 0.4) + geom_line(aes(x=x, y=pf(x)), color = 'blue', size =1) + geom_line(aes(x=x, y=(x-1)^3), color = 'green', size = 1, alpha = 0.5)
 ```
+
 Okay last one:
 ```{r}
 freg = function(X,Y, n){ 
