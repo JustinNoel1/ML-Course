@@ -39,17 +39,31 @@ For this rewrite our data in terms of matrices \(X\) and \(Y\) as above. In the 
 Comparing the quadratic parts in $\beta$ we see $$\Sigma^{-1}=(X^TX/\sigma^2+I/\tau^2).$$ Then we expand out the linear terms in $\beta$ and see that $$\mu=(X^TX/\sigma^2+\sigma^2/\tau^2 I)^{-1}X^TY.$$ Expanding out further, we find the constant terms agree. This identifies the mean of the posterior distribution as $\mu$. 
 
 ## R Lab
+
+Here we will code a linear regression function excluding the linear algebra part. While doing the linear algebra would also be instructive, it is not what we are trying to do here. Also linear algebra packages are typically crazy fast and any of our implementations would be drastically slower.
+
+The subtle part of this is getting the algorithm to work in the matrix is ill-conditioned. We will use the [QR decomposition](https://en.wikipedia.org/wiki/QR_decomposition). Then we have to compare this with what [R does](https://stat.ethz.ch/R-manual/R-devel/library/base/html/qr.html). 
+
+R's QR function does give us a Q and R, but \(QR\neq X\), confusingly enough. Instead the columns have been shuffled according to a pivot. So we calculate R, delete the zero columns from there. Reshuffle the columns of \(R'\) so that \(QR'\) is \(X\) with some dependent columns removed. Finally, we give the least squares solution using our trimmed data. 
+
+When applying the function for new predictions we have to trim the data first.
 ```{r}
 linreg = function(X,Y) {
-  beta = qr.coef(qr(X),Y)
-  function(A) A%*% beta
+  decomp = qr(X)
+  #Throw out the zero columns
+  newR = qr.R(decomp)[,1:decomp$rank]
+  #rearrange to put them back the way they came
+  inverse_pivot = sort.list(decomp$pivot[1:decomp$rank])
+  newR = newR[,inverse_pivot]
+  beta = qr.solve(t(newR) %*% newR) %*% t(newR) %*% t(qr.Q(decomp)) %*% Y
+  function(A) A[,1:decomp$rank]%*% beta
 }
 ```
 
 Test this:
 ```{r}
-variance = 0.5
-x = seq(0,5,0.1)
+variance = 1.0
+x = seq(0,5,0.25)
 l = length(x)
 xbias = as.matrix(cbind(1, x))
 y = 2*x-1+rnorm(l)*variance
@@ -59,7 +73,14 @@ lf = linreg(xbias, y)
 Plot
 ```{r}
 library(ggplot2)
-ggplot()+geom_point(aes(x=x, y=y), color = 'purple', alpha = 0.4) + geom_line(aes(x=x, y=lf(xbias)), color = 'blue', size =1) + geom_line(aes(x=x, y=2*x-1), color = 'green', size = 1, alpha = 0.5)
+ggplot()+
+  geom_point(aes(x=x, y=y, color = 'Samples'), alpha = 0.4) + 
+  geom_line(aes(x=x, y=lf(xbias), color = 'Fitted'), size =1) + 
+  geom_line(aes(x=x, y=2*x-1, color = 'True'),  size = 1, alpha = 0.5) + 
+  scale_color_brewer(palette = 'Dark2') +
+  labs(color = "Groups") +
+  ggtitle("Linear Regression") +
+  theme_gray()
 ```
 
 Okay that worked.
@@ -74,8 +95,8 @@ polyreg = function(X,Y, n){
 
 Test:
 ```{r}
-variance = 0.5
-x = seq(0,5,0.1)
+variance = 5
+x = seq(0,5,0.25)
 l = length(x)
 y = (x-1)^3+rnorm(l)*variance
 pf = polyreg(x, y, 3)
@@ -83,7 +104,14 @@ pf = polyreg(x, y, 3)
 
 Plot:
 ```{r}
-ggplot()+geom_point(aes(x=x, y=y), color = 'purple', alpha = 0.4) + geom_line(aes(x=x, y=pf(x)), color = 'blue', size =1) + geom_line(aes(x=x, y=(x-1)^3), color = 'green', size = 1, alpha = 0.5)
+ggplot()+
+  geom_point(aes(x=x, y=y, color = 'Samples'), alpha = 0.4) + 
+  geom_line(aes(x=x, y=pf(x), color = 'Fitted'), size =1) + 
+  geom_line(aes(x=x, y=(x-1)^3, color = 'True'),  size = 1, alpha = 0.5)+ 
+  scale_color_brewer(palette = 'Dark2') +
+  labs(color = "Groups") +
+  ggtitle("Polynomial Regression") +
+  theme_gray()
 ```
 
 Okay last one:
@@ -93,9 +121,9 @@ freg = function(X,Y, n){
   cosins = outer(X,0:n,function(a,b) cos(a*b))
   g = linreg(cbind(sins,cosins),Y)
   function(A) {
-     sins = outer(A,0:n,function(a,b) sin(a*b))
+     sins = outer(A,1:n,function(a,b) sin(a*b))
      cosins = outer(A,0:n,function(a,b) cos(a*b))
-     g(qr(cbind(sins, cosins)))
+     g(cbind(sins, cosins))
   }
 }
 ```
@@ -103,12 +131,24 @@ freg = function(X,Y, n){
 Test:
 ```{r}
 variance = 0.5
-x = seq(0,5,0.1)
+x = seq(0,5,0.05)
 l = length(x)
-yi=outer(x, 0:10, function(a,b) 2*sin(2^0.5 * a*b+3^0.5)) 
-y1 = sapply(y, sum,1) 
+y1 = 2*sin(2^0.5 * x^2+3^0.5)+x^3/50
 y = y1 + rnorm(l)*variance
-ff = freg(x, y, 10)
+ff = freg(x, y, 9)
 ```
 
 Plot:
+```{r}
+grid = seq(0,5,0.05)
+ggplot()+
+  geom_point(aes(x=x, y=y, color = 'Samples'), alpha = 0.4) + 
+  geom_line(aes(x=grid, y=ff(grid), color = 'Fitted'), size =1) + 
+  geom_line(aes(x=x, y=y1, color = 'True'),  size = 1, alpha = 0.5)+ 
+  scale_color_brewer(palette = 'Dark2') +
+  labs(color = "Groups") +
+  ggtitle("Fourier Regression") +
+  theme_gray()
+```
+
+That worked pretty well. 
