@@ -13,21 +13,21 @@ Exercises from [Problem Set 4](http://www.nullplug.org/ML-Blog/2017/11/09/proble
 
 ### Problem 2
 
-This proceeds just as in the ordinary linear regression case. We differentiate $$ L(\beta)=(X\beta-Y)^t(X\beta-Y)+\lambda \beta^t\beta. $$ with respect to $\beta$ to obtain:$$ \frac{\partial L}{\partial \beta}=X^t(X\beta-Y)+2\lambda \beta.$$
+This proceeds just as in the ordinary linear regression case. We differentiate $$ L(\beta)=(X\beta-Y)^t(X\beta-Y)+\lambda \beta^t\beta. $$ with respect to $\beta$ to obtain:$$ \frac{\partial L}{\partial \beta}=2X^t(X\beta-Y)+2\lambda \beta.$$
 
-The second derivative is $$ \frac{\partial^2 L}{\partial \beta^2}=X^tX+2\lambda I.$$ Since \(Z=X^tX\) corresponds to a symmetric positive semi-definite matrix it can be diagonalized \(Z=O^tDO\) with $O$ an orthogonal matrix and $D$ a diagonal matrix with non-negative entries. It follows that \(W=Z+2\lambda I=O^t(D+2\lambda I)O\) is a new matrix with Eigenvalues the Eigenvalues of \(Z\) increased by \(2\lambda\).
+The second derivative is $$ \frac{\partial^2 L}{\partial \beta^2}=2X^tX+2\lambda I.$$ Since \(Z=X^tX\) corresponds to a symmetric positive semi-definite matrix it can be diagonalized \(Z=O^tDO\) with $O$ an orthogonal matrix and $D$ a diagonal matrix with non-negative entries. It follows that \(W=Z+\lambda I=O^t(D+\lambda I)O\) is a new matrix with Eigenvalues the Eigenvalues of \(Z\) increased by \(\lambda\).
 
 This matrix is invertible if and only if all of the Eigenvalues are non-zero; in this case any extreme value of $L$ is a global minimum. If \(\lambda>0\) the matrix is *always* invertible, while if \(\lambda=0\) the matrix is invertible if and only if \(\ker X=0\). 
 
-Now assuming \(W\) is invertible, we can find the desired \(\beta\) as $$\beta = W^{-1}X^T Y.$$ Note that if we fitted this to the transformed input \(V=XO,\) then \(V^tV=D\) and our new solution would be of the form \(\beta'=O\beta=(D+2\lambda I)^{-1}V^T Y\). We can see that if a diagonal entry of \(D+2\lambda\) is very small relative to the number of samples, say \(\sim 10^{-10}\) then the corresponding coefficient of \(\beta'\) will be *huge* and \(\beta\) will have to have huge magnitude. 
+Now assuming \(W\) is invertible, we can find the desired \(\beta\) as $$\beta = W^{-1}X^T Y.$$ Note that if we fitted this to the transformed input \(V=XO,\) then \(V^tV=D\) and our new solution would be of the form \(\beta'=O\beta=(D+\lambda I)^{-1}V^T Y\). We can see that if a diagonal entry of \(D+\lambda\) is very small relative to the number of samples, say \(\sim 10^{-10}\) then the corresponding coefficient of \(\beta'\) will be *huge* and \(\beta\) will have to have huge magnitude. 
 
 From a machine learning perspective, this is a sign of overfitting: when the magnitude of $\beta$ is large relative to the size of the quantities in $X$ and $Y$, the learned function has an extreme dependency on some of the features. In particular, an Eigenvector for $W$ with small Eigenvalue will have a larger effect on the output than we might reasonably expect. 
 
 I know that is sort of fuzzy, but it can be more clearly seen in polynomial regression for large degree polynomials fitting a small degree polynomial. There are many ways to do this, but our preference is to for the large coefficients to be essentially zero. 
 
-So our preference is that none of the features have a truly extreme effect on the outcome, because it is our prior belief that we have no such feature. Note that the solution to the above problem is not equivariant to rescaling our inputs when \(\lambda>0\), so it is best to normalize our data first. For example, we could divide by the square root of the largest Eigenvalue of \(Z\), or we could just scale each feature so that its values are between 0 and 1. 
+So our preference is that none of the features have a truly *extreme* effect on the outcome, because it is our prior belief that we have no such feature. Note that the solution to the above problem is not equivariant to rescaling our inputs when \(\lambda>0\), so it is best to normalize our data first. For example, we could divide by the square root of the largest Eigenvalue of \(Z\), or we could just scale each feature so that its values are between 0 and 1. 
 
-After normalizing, we can set \(\lambda \) to be something reasonable say \(0.1\) and avoid some of the numerical instability discussed above. In practice, we would search for the best value of \(\lambda\) that minimizes our validation error (or perhaps use an information criterion).
+After normalizing, we can set \(\lambda \) to be something reasonable, say \(0.1\), and avoid some of the numerical instability discussed above. In practice, we would search for the best value of \(\lambda\) that minimizes our validation error (or perhaps use an information criterion).
 
 ### Problem 3
 
@@ -40,9 +40,9 @@ Comparing the quadratic parts in $\beta$ we see $$\Sigma^{-1}=(X^TX/\sigma^2+I/\
 
 ## R Lab
 
-Here we will code a linear regression function excluding the linear algebra part. While doing the linear algebra would also be instructive, it is not what we are trying to do here. Also linear algebra packages are typically crazy fast and any of our implementations would be drastically slower.
+Here we will code a linear regression function modulo the linear algebra part. While doing the linear algebra would also be instructive, it is not what we are trying to do here. Also, linear algebra packages are typically crazy fast and any of our implementations would be drastically slower.
 
-The subtle part of this is getting the algorithm to work in the matrix is ill-conditioned. We will use the [QR decomposition](https://en.wikipedia.org/wiki/QR_decomposition). Then we have to compare this with what [R does](https://stat.ethz.ch/R-manual/R-devel/library/base/html/qr.html). 
+The subtle part of this is getting the algorithm to work when the matrix is ill-conditioned. We will use the [QR decomposition](https://en.wikipedia.org/wiki/QR_decomposition). Then we have to compare this with what [R does](https://stat.ethz.ch/R-manual/R-devel/library/base/html/qr.html). 
 
 R's QR function does give us a Q and R, but \(QR\neq X\), confusingly enough. Instead the columns have been shuffled according to a pivot. So we calculate R, delete the zero columns from there. Reshuffle the columns of \(R'\) so that \(QR'\) is \(X\) with some dependent columns removed. Finally, we give the least squares solution using our trimmed data. 
 
@@ -55,8 +55,10 @@ linreg = function(X,Y) {
   #rearrange to put them back the way they came
   inverse_pivot = sort.list(decomp$pivot[1:decomp$rank])
   newR = newR[,inverse_pivot]
-  beta = qr.solve(t(newR) %*% newR) %*% t(newR) %*% t(qr.Q(decomp)) %*% Y
-  function(A) A[,1:decomp$rank]%*% beta
+  newRinv = qr.solve(t(newR) %*% newR)
+  beta =  newRinv %*% t(newR) %*% t(qr.Q(decomp)) %*% Y
+  #Return
+  function(A) A[,1:decomp$rank] %*% beta
 }
 ```
 

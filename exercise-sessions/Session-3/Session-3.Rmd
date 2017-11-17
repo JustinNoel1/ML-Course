@@ -28,7 +28,7 @@ For the mode, one sets the derivative to 0 andwe get that the extreme point is a
 ### Change of variables
 1. We get \(p_{Y\circ X}(t)=P(Y\circ X=t)=\sum_{z\in Y^{-1}(t)} p_x(z)\).
 1. These are independent terms so $$p_{X^n}(v_1,\dots,v_n)=\prod p_X(v_i)=\prod \theta^{v_i}(1-\theta)^{1-v_i}$$ and this is $$\theta^{\sum v_i}(1-\theta)^{n-\sum v_i}.$$ The next part is a simple application of the previous step and we obtain $$p_{\sigma\circ X^n}(k)=n!/(k!(n-k)!)\theta^{k}(1-\theta)^{n-k}.$$
-1. The composite of a measurable function \(X\) with a continuous function \(Y\) to  \(\Bbb R\) is measurable because it is neccessary and sufficient to check that the preimage of an open subset of \(\Bbb R\) is measurable, but because  \(Y\) is continuous the preimage of an open subset of \(\Bbb R\) is an open subset of \(\Bbb R\). Then the assumption that \(X\) is m
+1. The composite of a measurable function \(X\) with a continuous function \(Y\) to  \(\Bbb R\) is measurable because it is neccessary and sufficient to check that the preimage of an open subset of \(\Bbb R\) is measurable, but because  \(Y\) is continuous the preimage of an open subset of \(\Bbb R\) is an open subset of \(\Bbb R\). Remainder omitted to do to live texing.
 
 
 
