@@ -1,0 +1,90 @@
+---
+title: "Problem Session 3"
+author: "Justin Noel"
+date: "11/3/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, include = TRUE, warning = FALSE)
+```
+
+## Exercises
+From [Problem Set 3](http://www.nullplug.org/ML-Blog/2017/11/03/problem-set-3/).
+
+### R Lab
+
+Let's load our datasets:
+```{r}
+library(tidyverse)
+tr_tbl = read_csv("train.csv")
+test_tbl = read_csv("test.csv")
+all_text = c(tr_tbl$text, test_tbl$text)
+```
+Let's make a dfm:
+```{r}
+library(quanteda)
+corp = corpus(all_text)
+all_dfm = dfm(corp, remove = stopwords("english"), stem = T, remove_punct = T, remove_numbers = T)
+all_dfm_trm = dfm_trim(all_dfm, min_count = 5, max_count = 1000, verbose = T)
+
+```
+
+Transform the counts into binary counts.
+```{r}
+all_dfm_trm_b = tf(all_dfm_trm, scheme="boolean")
+```
+
+Build our train and validation data frames.
+```{r}
+train_df = as.tibble(as.data.frame(all_dfm_trm_b[1:length(tr_tbl$author)]))
+train_df$author = tr_tbl$author
+library(caret)
+train_ix = createDataPartition(train_df$author, p = 0.8, list = F, times = 1)
+train = slice(train_df,train_ix)
+valid = slice(train_df, -train_ix)
+```
+Construct our model. For numerical stability reasons I will use the logarithm of the smoothed possibilities for the weights. 
+
+I apologize for the terrible code here. For whatever reason, using the "length" command instead of the "n" command in normalizing the data is incredibly slow once the number of features gets large (the code would not complete on my laptop. So the simple code had to be replaced with a much more convoluted block which does the same thing, but somehow is fast enough to execute.
+```{r}
+# This more readable code runs 35 times slower than the mess that follows it.
+#smoother = function(x) { return( log( (sum(x)+1)/(length(x)+2)) )}
+#system.time({ber_model = train %>% group_by(author) %>% summarize_all(.funs = smoother)})
+
+# I need to recover the size of the groups
+# Turn the means into sums
+# Add one to all entries for smoothing
+# Divide by the size of each group + 2 (for smoothing)
+system.time({ber_model <- train %>% group_by(author) %>% mutate(sz = n()) %>% summarize_all(.funs = mean)
+ber_mode_mat = diag(ber_model$sz) %*% as.matrix(select(ber_model,-author,-sz))
+ber_mode_mat2 = ber_mode_mat+matrix(data = rep.int(1,prod(dim(ber_mode_mat))),nrow = nrow(ber_mode_mat))
+ber_mode_mat3 =  diag(map(ber_model$sz, ~1/(.+2))) %*% ber_mode_mat2 })
+```
+
+Now let us run the model:
+```{r}
+#log_probs = as.matrix(select(ber_model,-author)) %*% t(as.matrix(select(valid,-author)))
+#get 
+log_probs = log(ber_mode_mat3) %*% t(as.matrix(select(valid,-author)))
+log_probs = apply(log_probs, c(1,2), function(n) max(n,-500))
+log_part = apply(log_probs,2,function(x){log(sum(exp(x)))})
+log_part = matrix(rep(log_part,3),nrow = 3, byrow = TRUE)
+log_probs = log_probs - log_part
+preds = apply(log_probs, 2, function(x){return(ber_model$author[which.max(x)])})
+
+```
+Calculate the accuracy of our model:
+```{r}
+mean(preds == slice(train_df, -train_ix)$author)
+```
+Not too bad.
+
+Let's calculate the average negative log loss; for this we will use the so-called one-hot encoding matrix:
+```{r}
+val_labels = slice(train_df,-train_ix) %>%
+  select(author)
+val_matrix = t(model.matrix(~author -1, data = val_labels))
+-sum(val_matrix*log_probs)/length(val_labels$author)
+```
+That is just barely good enough to hit the 68th percentile in this Kaggle competition as of the time of this writing. Not great, but still it is nice to see this all work explicitly.
