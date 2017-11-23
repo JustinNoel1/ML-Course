@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = F)
 ```
 
 ## R Lab
@@ -51,12 +51,50 @@ B[,]
 Write an LDA classifier from scratch.
 ```{r}
 LDAClassifier = function(x,y) {
+  num_features = dim(x)[2]
+  num_samples = dim(x)[1]
+  
+  #build df
   t = as.tibble(cbind(x,y))
-  colnames(t)=c(paste0('x',1:dim(x)[2]), 'y')
+  colnames(t)=c(paste0('x',1:num_features), 'y')
+  
+  #calculate group means
   means = t %>%
     group_by(y) %>%
     summarize_all(.funs = c(mean))
-  t = t %>% mutate(vect = )
+  num_classes = dim(means)[1]
+  
+  #calculate covariance matrix
+  cov_mat = matrix(numeric(num_features*num_features),num_features,num_features)
+  for(ix in 1:num_samples) {
+    #get vector
+    v = as.matrix(t[ix,1:num_features])
+    #center it
+    v = v-as.matrix(means[t[[ix,(num_features+1)]],2:(num_features+1)])
+    cov_mat = cov_mat + t(v) %*% v
+  }
+  cov_mat = cov_mat / (num_samples-num_features)
+  prec_mat = solve(cov_mat)
+  denominator = (det(2*pi*cov_mat))^(0.5)
+  
+  #only do this for single classes
+  probs = function(x) {
+    ve = matrix(x,ncol=num_features,nrow = 1)
+    prbs = numeric(num_classes)
+    for(c in 1:num_classes) {
+      mu = as.matrix(means[c,2:(num_features+1)], ncol = num_features, nrow = 1)
+      vec = ve-mu
+      exponent = - vec %*% prec_mat %*% t(vec) / 2
+      prbs[c]=exp(exponent)/denominator
+    }
+    return(prbs)
+  }
+  
+  prediction = function(x) {
+    which(probs(x)==max(probs(x)))
+  }
+  
+  return(list(probs = probs, prediction = prediction, means = means[,2:(num_features+1)], covariance = cov_mat))
 }
 ```
 
@@ -75,7 +113,7 @@ generate_lda_clusters = function(classes, dim, num_samples) {
       break
   }
   # generate means
-  means = matrix(runif(dim*classes),dim,classes)
+  means = matrix(1.5*runif(dim*classes),dim,classes)
   
   #initialize data frame
   xvals = matrix(numeric(dim*classes*num_samples), num_samples*classes, dim)
@@ -89,13 +127,260 @@ generate_lda_clusters = function(classes, dim, num_samples) {
       t[(ix+1),]=c(mvrnorm(1,means[,c],cov_mat),c)
   }
   # Generate output
-  output = list(data = t, means = means, covariance = cov_mat)
+  output = list(data = t, means = t(means), covariance = cov_mat)
   return(output)
 }
 ```
 
 Now let's check on our data:
 ```{r}
+df = generate_lda_clusters(3,4,100)
+xvals = df$data[,1:4]
+yvals = df$data[,5]
+ldac = LDAClassifier(xvals,yvals)
+```
+Compare means
+```{r}
+df$means
+```
+```{r}
+ldac$means
+```
+```{r}
+ldac$means-df$means
+```
 
+That looks okay. Although ramping up the number of samples would help confirm this.
+
+How about the covariance matrices:
+```{r}
+df$covariance
+```
+
+```{r}
+ldac$covariance
+```
+```{r}
+df$covariance-ldac$covariance
+```
+
+Okay. Let's test the predictions.
+```{r}
+preds = apply(xvals, 1, ldac$prediction)
+mean(preds == yvals)
+```
+
+Let's train the model on a subset of the data now.
+```{r}
+df = generate_lda_clusters(4,5,400)
+xvals = df$data[,1:5]
+yvals = df$data[,6]
+#shuffle our data
+num_samples = dim(xvals)[1]
+perm = sample(1:num_samples)
+xvals = xvals[perm,]
+yvals = yvals[perm,]
+
+#split it into training and test sets
+split = (num_samples * 9) %/% 10
+tr_xvals = xvals[1:split,]
+test_xvals = xvals[(split+1):num_samples, ]
+tr_yvals = yvals[1:split,]
+test_yvals = yvals[(split+1):num_samples,]
+
+#Fit our classifier
+ldac = LDAClassifier(tr_xvals, tr_yvals)
+preds = apply(test_xvals, 1, ldac$prediction)
+mean(preds == test_yvals)
+```
+
+Okay, onto QDA:
+```{r}
+QDAClassifier = function(x,y) {
+  num_features = dim(x)[2]
+  num_samples = dim(x)[1]
+  
+  #build df
+  t = as.tibble(cbind(x,y))
+  colnames(t)=c(paste0('x',1:num_features), 'y')
+  
+  #calculate group means
+  means = t %>%
+    group_by(y) %>%
+    summarize_all(.funs = c(mean))
+  num_classes = dim(means)[1]
+  
+  #calculate covariance matrices
+  cov_mats = array(numeric(num_classes*num_features^2), dim = c(num_classes, num_features, num_features))
+  prec_mats = array(dim = c(num_classes, num_features, num_features))
+  denominators = numeric(num_classes)
+  for(c in 1:num_classes) {
+    #get the samples in the class
+    class_samples = t %>%
+      filter(y == c) %>%
+      dplyr::select(-y)
+    
+    num_in_class = dim(class_samples)[1]
+    
+    for(ix in 1:num_in_class) {
+      #get vector
+      v = as.matrix(class_samples[ix,])
+      #center it
+      v = v-as.matrix(means[c,2:(num_features+1)])
+      cov_mats[c,,] = cov_mats[c,,] + t(v) %*% v
+      
+    }
+    cov_mats[c,,] = cov_mats[c,,] / (num_in_class-1)
+    prec_mats[c,,] = solve(cov_mats[c,,])
+    denominators[c] = (det(2*pi*cov_mats[c,,]))^(0.5)
+  }
+  
+  
+  #only do this for single classes
+  probs = function(x) {
+    ve = matrix(x,ncol=num_features,nrow = 1)
+    prbs = numeric(num_classes)
+    for(c in 1:num_classes) {
+      mu = as.matrix(means[c,2:(num_features+1)], ncol = num_features, nrow = 1)
+      vec = ve-mu
+      exponent = - vec %*% prec_mats[c,,] %*% t(vec) / 2
+      prbs[c]=exp(exponent)/denominators[c]
+    }
+    return(prbs)
+  }
+  
+  prediction = function(x) {
+    which(probs(x)==max(probs(x)))
+  }
+  
+  return(list(probs = probs, prediction = prediction, means = means[,2:(num_features+1)], covariance = cov_mats))
+}
+```
+
+Generate synthetic data:
+```{r}
+generate_qda_clusters = function(classes, dim, num_samples) {
+
+  # generate non-degenerate covariance matrices
+  # initialize matrices
+  cov_mats = array(dim = c(classes, dim, dim))
+  for(c in 1:classes) {
+    repeat{
+      A = matrix(runif(dim^2),dim,dim)  
+      cov_mat = A%*%t(A)
+      if(det(cov_mat)!=0) {
+        cov_mats[c,,]=cov_mat
+        break
+      }
+    }
+  }
+  # generate means
+  means = matrix(1.5*runif(dim*classes),dim,classes)
+  
+  #initialize data frame
+  xvals = matrix(numeric(dim*classes*num_samples), num_samples*classes, dim)
+  y = matrix(numeric(classes*num_samples),classes*num_samples, 1)
+  t = as.tibble(cbind(xvals,y))
+  colnames(t)=c(paste0('x',1:dim),'y')
+  
+  # Fill data frame
+  for(ix in 0:(num_samples*classes-1)) {
+      c = (ix %/% num_samples)+1
+      t[(ix+1),]=c(mvrnorm(1,means[,c],cov_mats[c,,]),c)
+  }
+  # Generate output
+  output = list(data = t, means = t(means), covariance = cov_mats)
+  return(output)
+}
+```
+
+Let's see if that worked:
+```{r}
+df = generate_qda_clusters(3,4,100)
+xvals = df$data[,1:4]
+yvals = df$data[,5]
+qdac = QDAClassifier(xvals,yvals)
+```
+
+Compare means:
+```{r}
+qdac$means
+```
+
+```{r}
+df$means
+```
+```{r}
+mean((qdac$means - df$means)^2)
+```
+
+Okay covariances:
+```{r}
+qdac$covariance
+```
+```{r}
+df$covariance
+```
+```{r}
+mean((qdac$covariance-df$covariance)^2)
+```
+
+Great those estimates look okay. How are the predictions:
+```{r}
+df = generate_qda_clusters(2,5,400)
+xvals = df$data[,1:5]
+yvals = df$data[,6]
+#shuffle our data
+num_samples = dim(xvals)[1]
+perm = sample(1:num_samples)
+xvals = xvals[perm,]
+yvals = yvals[perm,]
+
+#split it into training and test sets
+split = (num_samples * 9) %/% 10
+tr_xvals = xvals[1:split,]
+test_xvals = xvals[(split+1):num_samples, ]
+tr_yvals = yvals[1:split,]
+test_yvals = yvals[(split+1):num_samples,]
+
+#Fit our classifier
+qdac = QDAClassifier(tr_xvals, tr_yvals)
+tr_preds = as.matrix(apply(tr_xvals, 1, qdac$prediction))
+test_preds = as.matrix(apply(test_xvals,1,qdac$prediction))
+
+# Compare with LDA
+ldac = LDAClassifier(tr_xvals, tr_yvals)
+tr_preds2 = as.matrix(apply(tr_xvals, 1, ldac$prediction))
+test_preds2 = as.matrix(apply(test_xvals,1,ldac$prediction))
+```
+
+Let's see how we did
+```{r}
+output = tibble(LDA = c(mean(tr_preds2 == tr_yvals), mean(test_preds2 == test_yvals)), QDA = c(mean(tr_preds == tr_yvals), mean(test_preds == test_yvals)))
+output
+```
+
+Digits
+```{r}
+library(keras)
+mnist = dataset_mnist()
+x_train = mnist$train$x
+x_train = array_reshape(x_train, c(nrow(x_train),784))
+pca = prcomp(x_train, rank.=5)
+tt = pca$x
+y_train = mnist$train$y+1
+ty = y_train[samples]
+ldac = LDAClassifier(tt, y_train)
+preds = apply(tt, 1, ldac$prediction)
+mean(preds == y_train)
+```
+Try this on test data
+```{r}
+x_test = mnist$test$x
+x_test = array_reshape(x_test, c(nrow(x_test),784))
+ttt = pca$predict(x_test)
+y_test = mnist$test$y+1
+preds = apply(ttt, 1, ldac$prediction)
+mean(preds == y_test)
 ```
 
