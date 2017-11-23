@@ -10,4 +10,92 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## R Lab
+Write a function in R that will take in a vector of discrete variables and will produce the corresponding one hot encodings.
+
+```{r}
+library(tidyverse)
+#Function takes in data and returns a function which performs one hot encoding with respect to that data
+OHE = function(x) {
+  #Get list of unique entries (sort for convenience)
+  values = unique(sort(x))
+  num_values = length(values)
+  encoder = function(z){
+    #find index
+    ix = match(z,values)
+    #initialize zero vector
+    v = numeric(num_values)
+    v[ix]=1
+    return(v)
+  }
+  
+  #vectorized encoder
+  function(y) {
+    matrix(map(y,encoder))
+  }
+}
+```
+
+Test this on some data:
+```{r}
+Y = c(1,2,3)
+encoder = OHE(Y)
+A=encoder(Y)
+A[,]
+
+Z = c('c','e','e','a','b')
+encoder2 = OHE(Z)
+B = encoder2(Z)
+B[,]
+```
+
+Write an LDA classifier from scratch.
+```{r}
+LDAClassifier = function(x,y) {
+  t = as.tibble(cbind(x,y))
+  colnames(t)=c(paste0('x',1:dim(x)[2]), 'y')
+  means = t %>%
+    group_by(y) %>%
+    summarize_all(.funs = c(mean))
+  t = t %>% mutate(vect = )
+}
+```
+
+Let's test this on some data.
+
+First build a data generator:
+```{r}
+#need multivariate Gaussian
+library(MASS)
+generate_lda_clusters = function(classes, dim, num_samples) {
+  # generate a non-degenerate covariance matrix
+  repeat{
+    A = matrix(runif(dim^2),dim,dim)  
+    cov_mat = A%*%t(A)
+    if(det(cov_mat)!=0)
+      break
+  }
+  # generate means
+  means = matrix(runif(dim*classes),dim,classes)
+  
+  #initialize data frame
+  xvals = matrix(numeric(dim*classes*num_samples), num_samples*classes, dim)
+  y = matrix(numeric(classes*num_samples),classes*num_samples, 1)
+  t = as.tibble(cbind(xvals,y))
+  colnames(t)=c(paste0('x',1:dim),'y')
+  
+  # Fill data frame
+  for(ix in 0:(num_samples*classes-1)) {
+      c = (ix %/% num_samples)+1
+      t[(ix+1),]=c(mvrnorm(1,means[,c],cov_mat),c)
+  }
+  # Generate output
+  output = list(data = t, means = means, covariance = cov_mat)
+  return(output)
+}
+```
+
+Now let's check on our data:
+```{r}
+
+```
 
