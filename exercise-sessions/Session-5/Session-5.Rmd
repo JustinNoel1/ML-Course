@@ -360,7 +360,7 @@ output = tibble(LDA = c(mean(tr_preds2 == tr_yvals), mean(test_preds2 == test_yv
 output
 ```
 
-Digits
+Digits. For this we will first apply a PCA dimension reduction to our data. This both makes the problem more tractable and removes
 ```{r}
 library(keras)
 mnist = dataset_mnist()

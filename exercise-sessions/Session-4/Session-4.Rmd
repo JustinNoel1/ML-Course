@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
 ```
 
 Exercises from [Problem Set 4](http://www.nullplug.org/ML-Blog/2017/11/09/problem-set-4/). 
@@ -58,7 +58,12 @@ linreg = function(X,Y) {
   newRinv = qr.solve(t(newR) %*% newR)
   beta =  newRinv %*% t(newR) %*% t(qr.Q(decomp)) %*% Y
   #Return
-  function(A) A[,1:decomp$rank] %*% beta
+  function(A){
+
+    A=A[,decomp$pivot]
+    A=A[,1:decomp$rank] 
+    A=A[,inverse_pivot]%*% beta
+  }
 }
 ```
 
@@ -116,15 +121,15 @@ ggplot()+
   theme_gray()
 ```
 
-Okay last one:
+Okay last one. Note that the transformed features are highly dependent:
 ```{r}
 freg = function(X,Y, n){ 
-  sins = outer(X,0:n,function(a,b) sin(a*b))
-  cosins = outer(X,0:n,function(a,b) cos(a*b))
+  sins = outer(X,-n:n,function(a,b) sin(a*b))
+  cosins = outer(X,-n:n,function(a,b) cos(a*b))
   g = linreg(cbind(sins,cosins),Y)
   function(A) {
-     sins = outer(A,1:n,function(a,b) sin(a*b))
-     cosins = outer(A,0:n,function(a,b) cos(a*b))
+     sins = outer(A,-n:n,function(a,b) sin(a*b))
+     cosins = outer(A,-n:n,function(a,b) cos(a*b))
      g(cbind(sins, cosins))
   }
 }
