@@ -364,23 +364,31 @@ Digits
 ```{r}
 library(keras)
 mnist = dataset_mnist()
+to_sample = 1:10000
 x_train = mnist$train$x
 x_train = array_reshape(x_train, c(nrow(x_train),784))
-pca = prcomp(x_train, rank.=5)
+pca = prcomp(x_train[to_sample,], rank.=30)
 tt = pca$x
 y_train = mnist$train$y+1
-ty = y_train[samples]
-ldac = LDAClassifier(tt, y_train)
-preds = apply(tt, 1, ldac$prediction)
-mean(preds == y_train)
+ldac = LDAClassifier(tt, y_train[to_sample])
+qdac = QDAClassifier(tt, y_train[to_sample])
+tr_preds = apply(tt, 1, ldac$prediction)
+tr_preds2 = apply(tt, 1, qdac$prediction)
+lda_tr = mean(tr_preds == y_train[to_sample])
+qda_tr = mean(tr_preds2 == y_train[to_sample])
 ```
 Try this on test data
 ```{r}
+to_test = 1:10000
 x_test = mnist$test$x
 x_test = array_reshape(x_test, c(nrow(x_test),784))
-ttt = pca$predict(x_test)
+ttt = predict(pca, x_test[to_test,])
 y_test = mnist$test$y+1
-preds = apply(ttt, 1, ldac$prediction)
-mean(preds == y_test)
+test_preds = apply(ttt, 1, ldac$prediction)
+test_preds2 = apply(ttt, 1, qdac$prediction)
+lda_test = mean(test_preds == y_test[to_test])
+qda_test = mean(test_preds2 == y_test[to_test])
+output = tibble(LDA = c(lda_tr, lda_test), QDA = c(qda_tr, qda_test))
+output
 ```
 
