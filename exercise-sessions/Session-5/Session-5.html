@@ -129,19 +129,31 @@ $(document).ready(function () {
 <div id="r-lab" class="section level2">
 <h2>R Lab</h2>
 <p>Write a function in R that will take in a vector of discrete variables and will produce the corresponding one hot encodings.</p>
-<pre><code>## Warning: package 'tidyverse' was built under R version 3.4.2</code></pre>
-<pre><code>## ── Attaching packages ────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
-<pre><code>## ✔ ggplot2 2.2.1     ✔ purrr   0.2.4
-## ✔ tibble  1.3.4     ✔ dplyr   0.7.4
-## ✔ tidyr   0.7.2     ✔ stringr 1.2.0
-## ✔ readr   1.1.1     ✔ forcats 0.2.0</code></pre>
-<pre><code>## Warning: package 'tidyr' was built under R version 3.4.2</code></pre>
-<pre><code>## Warning: package 'purrr' was built under R version 3.4.2</code></pre>
-<pre><code>## Warning: package 'dplyr' was built under R version 3.4.2</code></pre>
-<pre><code>## ── Conflicts ───────────────────────────────────── tidyverse_conflicts() ──
-## ✖ dplyr::filter() masks stats::filter()
-## ✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(tidyverse)
+#Function takes in data and returns a function which performs one hot encoding with respect to that data
+OHE = function(x) {
+  #Get list of unique entries (sort for convenience)
+  values = unique(sort(x))
+  num_values = length(values)
+  encoder = function(z){
+    #find index
+    ix = match(z,values)
+    #initialize zero vector
+    v = numeric(num_values)
+    v[ix]=1
+    return(v)
+  }
+  
+  #vectorized encoder
+  function(y) {
+    matrix(map(y,encoder))
+  }
+}</code></pre>
 <p>Test this on some data:</p>
+<pre class="r"><code>Y = c(1,2,3)
+encoder = OHE(Y)
+A=encoder(Y)
+A[,]</code></pre>
 <pre><code>## [[1]]
 ## [1] 1 0 0
 ## 
@@ -150,6 +162,10 @@ $(document).ready(function () {
 ## 
 ## [[3]]
 ## [1] 0 0 1</code></pre>
+<pre class="r"><code>Z = c('c','e','e','a','b')
+encoder2 = OHE(Z)
+B = encoder2(Z)
+B[,]</code></pre>
 <pre><code>## [[1]]
 ## [1] 0 0 1 0
 ## 
@@ -165,130 +181,378 @@ $(document).ready(function () {
 ## [[5]]
 ## [1] 0 1 0 0</code></pre>
 <p>Write an LDA classifier from scratch.</p>
+<pre class="r"><code>LDAClassifier = function(x,y) {
+  num_features = dim(x)[2]
+  num_samples = dim(x)[1]
+  
+  #build df
+  t = as.tibble(cbind(x,y))
+  colnames(t)=c(paste0('x',1:num_features), 'y')
+  
+  #calculate group means
+  means = t %&gt;%
+    group_by(y) %&gt;%
+    summarize_all(.funs = c(mean))
+  num_classes = dim(means)[1]
+  
+  #calculate covariance matrix
+  cov_mat = matrix(numeric(num_features*num_features),num_features,num_features)
+  for(ix in 1:num_samples) {
+    #get vector
+    v = as.matrix(t[ix,1:num_features])
+    #center it
+    v = v-as.matrix(means[t[[ix,(num_features+1)]],2:(num_features+1)])
+    cov_mat = cov_mat + t(v) %*% v
+  }
+  cov_mat = cov_mat / (num_samples-num_features)
+  prec_mat = solve(cov_mat)
+  denominator = (det(2*pi*cov_mat))^(0.5)
+  
+  #only do this for single classes
+  probs = function(x) {
+    ve = matrix(x,ncol=num_features,nrow = 1)
+    prbs = numeric(num_classes)
+    for(c in 1:num_classes) {
+      mu = as.matrix(means[c,2:(num_features+1)], ncol = num_features, nrow = 1)
+      vec = ve-mu
+      exponent = - vec %*% prec_mat %*% t(vec) / 2
+      prbs[c]=exp(exponent)/denominator
+    }
+    return(prbs)
+  }
+  
+  prediction = function(x) {
+    which(probs(x)==max(probs(x)))
+  }
+  
+  return(list(probs = probs, prediction = prediction, means = means[,2:(num_features+1)], covariance = cov_mat))
+}</code></pre>
 <p>Let’s test this on some data.</p>
 <p>First build a data generator:</p>
-<pre><code>## 
-## Attaching package: 'MASS'</code></pre>
-<pre><code>## The following object is masked from 'package:dplyr':
-## 
-##     select</code></pre>
+<pre class="r"><code>#need multivariate Gaussian
+library(MASS)
+generate_lda_clusters = function(classes, dim, num_samples) {
+  # generate a non-degenerate covariance matrix
+  repeat{
+    A = matrix(runif(dim^2),dim,dim)  
+    cov_mat = A%*%t(A)
+    if(det(cov_mat)!=0)
+      break
+  }
+  # generate means
+  means = matrix(1.5*runif(dim*classes),dim,classes)
+  
+  #initialize data frame
+  xvals = matrix(numeric(dim*classes*num_samples), num_samples*classes, dim)
+  y = matrix(numeric(classes*num_samples),classes*num_samples, 1)
+  t = as.tibble(cbind(xvals,y))
+  colnames(t)=c(paste0('x',1:dim),'y')
+  
+  # Fill data frame
+  for(ix in 0:(num_samples*classes-1)) {
+      c = (ix %/% num_samples)+1
+      t[(ix+1),]=c(mvrnorm(1,means[,c],cov_mat),c)
+  }
+  # Generate output
+  output = list(data = t, means = t(means), covariance = cov_mat)
+  return(output)
+}</code></pre>
 <p>Now let’s check on our data:</p>
+<pre class="r"><code>df = generate_lda_clusters(3,4,100)
+xvals = df$data[,1:4]
+yvals = df$data[,5]
+ldac = LDAClassifier(xvals,yvals)</code></pre>
 <p>Compare means</p>
-<pre><code>##           [,1]      [,2]      [,3]      [,4]
-## [1,] 0.8221892 0.8021240 0.9925076 0.9470979
-## [2,] 1.1814179 0.2924765 1.2688128 1.4328793
-## [3,] 0.9749869 1.3198297 0.5805553 1.2518890</code></pre>
+<pre class="r"><code>df$means</code></pre>
+<pre><code>##           [,1]      [,2]       [,3]      [,4]
+## [1,] 0.3125229 1.0841688 0.12594605 0.5550949
+## [2,] 0.2270865 0.4517686 1.23708396 0.7945876
+## [3,] 0.3414310 1.1133693 0.04939824 0.3156251</code></pre>
+<pre class="r"><code>ldac$means</code></pre>
 <pre><code>## # A tibble: 3 x 4
-##          x1        x2        x3       x4
-##       &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-## 1 0.7801432 0.9284225 1.0350847 1.030082
-## 2 1.1957804 0.4777666 1.3541383 1.550902
-## 3 1.1327394 1.4581573 0.4840589 1.324990</code></pre>
-<pre><code>##            x1        x2          x3         x4
-## 1 -0.04204598 0.1262985  0.04257712 0.08298370
-## 2  0.01436249 0.1852901  0.08532555 0.11802304
-## 3  0.15775246 0.1383276 -0.09649648 0.07310127</code></pre>
+##            x1        x2         x3        x4
+##         &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+## 1  0.10909251 0.9540355 0.02111604 0.5473968
+## 2 -0.05112211 0.2573860 0.87058751 0.6644486
+## 3  0.36734449 1.1572070 0.14607237 0.3772112</code></pre>
+<pre class="r"><code>mean((ldac$means-df$means)^2)</code></pre>
+<pre><code>## [1] 0.02929497</code></pre>
 <p>That looks okay. Although ramping up the number of samples would help confirm this.</p>
 <p>How about the covariance matrices:</p>
-<pre><code>##           [,1]      [,2]      [,3]     [,4]
-## [1,] 1.2826765 1.0386045 0.5331234 1.411242
-## [2,] 1.0386045 1.5633929 0.8087432 1.629518
-## [3,] 0.5331234 0.8087432 0.8204014 1.081803
-## [4,] 1.4112422 1.6295175 1.0818030 2.049858</code></pre>
-<pre><code>##           x1       x2        x3       x4
-## x1 1.1839348 1.030243 0.5367534 1.357260
-## x2 1.0302425 1.595615 0.8481700 1.643977
-## x3 0.5367534 0.848170 0.8567093 1.113020
-## x4 1.3572595 1.643977 1.1130198 2.036345</code></pre>
-<pre><code>##              x1           x2           x3          x4
-## x1  0.098741767  0.008361986 -0.003630049  0.05398264
-## x2  0.008361986 -0.032221615 -0.039426732 -0.01445954
-## x3 -0.003630049 -0.039426732 -0.036307874 -0.03121680
-## x4  0.053982644 -0.014459538 -0.031216799  0.01351252</code></pre>
+<pre class="r"><code>df$covariance</code></pre>
+<pre><code>##           [,1]      [,2]     [,3]      [,4]
+## [1,] 1.5177447 1.0525887 1.506939 0.4934024
+## [2,] 1.0525887 0.7705465 1.186560 0.4902052
+## [3,] 1.5069386 1.1865595 2.411171 1.2904221
+## [4,] 0.4934024 0.4902052 1.290422 1.0011432</code></pre>
+<pre class="r"><code>ldac$covariance</code></pre>
+<pre><code>##           x1        x2        x3        x4
+## x1 1.3919882 0.9505166 1.2609327 0.3318194
+## x2 0.9505166 0.6865811 0.9988325 0.3672778
+## x3 1.2609327 0.9988325 2.0355535 1.0759091
+## x4 0.3318194 0.3672778 1.0759091 0.8759444</code></pre>
+<pre class="r"><code>mean((df$covariance-ldac$covariance)^2)</code></pre>
+<pre><code>## [1] 0.03540363</code></pre>
 <p>Okay. Let’s test the predictions.</p>
-<pre><code>## [1] 0.7766667</code></pre>
+<pre class="r"><code>preds = apply(xvals, 1, ldac$prediction)
+mean(preds == yvals)</code></pre>
+<pre><code>## [1] 0.7733333</code></pre>
 <p>Let’s train the model on a subset of the data now.</p>
-<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>df = generate_lda_clusters(4,5,400)
+xvals = df$data[,1:5]
+yvals = df$data[,6]
+#shuffle our data
+num_samples = dim(xvals)[1]
+perm = sample(1:num_samples)
+xvals = xvals[perm,]
+yvals = yvals[perm,]
+
+#split it into training and test sets
+split = (num_samples * 9) %/% 10
+tr_xvals = xvals[1:split,]
+test_xvals = xvals[(split+1):num_samples, ]
+tr_yvals = yvals[1:split,]
+test_yvals = yvals[(split+1):num_samples,]
+
+#Fit our classifier
+ldac = LDAClassifier(tr_xvals, tr_yvals)
+preds = apply(test_xvals, 1, ldac$prediction)
+mean(preds == test_yvals)</code></pre>
+<pre><code>## [1] 0.9375</code></pre>
 <p>Okay, onto QDA:</p>
+<pre class="r"><code>QDAClassifier = function(x,y) {
+  num_features = dim(x)[2]
+  num_samples = dim(x)[1]
+  
+  #build df
+  t = as.tibble(cbind(x,y))
+  colnames(t)=c(paste0('x',1:num_features), 'y')
+  
+  #calculate group means
+  means = t %&gt;%
+    group_by(y) %&gt;%
+    summarize_all(.funs = c(mean))
+  num_classes = dim(means)[1]
+  
+  #calculate covariance matrices
+  cov_mats = array(numeric(num_classes*num_features^2), dim = c(num_classes, num_features, num_features))
+  prec_mats = array(dim = c(num_classes, num_features, num_features))
+  denominators = numeric(num_classes)
+  for(c in 1:num_classes) {
+    #get the samples in the class
+    class_samples = t %&gt;%
+      filter(y == c) %&gt;%
+      dplyr::select(-y)
+    
+    num_in_class = dim(class_samples)[1]
+    
+    for(ix in 1:num_in_class) {
+      #get vector
+      v = as.matrix(class_samples[ix,])
+      #center it
+      v = v-as.matrix(means[c,2:(num_features+1)])
+      cov_mats[c,,] = cov_mats[c,,] + t(v) %*% v
+      
+    }
+    cov_mats[c,,] = cov_mats[c,,] / (num_in_class-1)
+    prec_mats[c,,] = solve(cov_mats[c,,])
+    denominators[c] = (det(2*pi*cov_mats[c,,]))^(0.5)
+  }
+  
+  
+  #only do this for single classes
+  probs = function(x) {
+    ve = matrix(x,ncol=num_features,nrow = 1)
+    prbs = numeric(num_classes)
+    for(c in 1:num_classes) {
+      mu = as.matrix(means[c,2:(num_features+1)], ncol = num_features, nrow = 1)
+      vec = ve-mu
+      exponent = - vec %*% prec_mats[c,,] %*% t(vec) / 2
+      prbs[c]=exp(exponent)/denominators[c]
+    }
+    return(prbs)
+  }
+  
+  prediction = function(x) {
+    which(probs(x)==max(probs(x)))
+  }
+  
+  return(list(probs = probs, prediction = prediction, means = means[,2:(num_features+1)], covariance = cov_mats))
+}</code></pre>
 <p>Generate synthetic data:</p>
+<pre class="r"><code>generate_qda_clusters = function(classes, dim, num_samples) {
+
+  # generate non-degenerate covariance matrices
+  # initialize matrices
+  cov_mats = array(dim = c(classes, dim, dim))
+  for(c in 1:classes) {
+    repeat{
+      A = matrix(runif(dim^2),dim,dim)  
+      cov_mat = A%*%t(A)
+      if(det(cov_mat)!=0) {
+        cov_mats[c,,]=cov_mat
+        break
+      }
+    }
+  }
+  # generate means
+  means = matrix(1.5*runif(dim*classes),dim,classes)
+  
+  #initialize data frame
+  xvals = matrix(numeric(dim*classes*num_samples), num_samples*classes, dim)
+  y = matrix(numeric(classes*num_samples),classes*num_samples, 1)
+  t = as.tibble(cbind(xvals,y))
+  colnames(t)=c(paste0('x',1:dim),'y')
+  
+  # Fill data frame
+  for(ix in 0:(num_samples*classes-1)) {
+      c = (ix %/% num_samples)+1
+      t[(ix+1),]=c(mvrnorm(1,means[,c],cov_mats[c,,]),c)
+  }
+  # Generate output
+  output = list(data = t, means = t(means), covariance = cov_mats)
+  return(output)
+}</code></pre>
 <p>Let’s see if that worked:</p>
+<pre class="r"><code>df = generate_qda_clusters(3,4,100)
+xvals = df$data[,1:4]
+yvals = df$data[,5]
+qdac = QDAClassifier(xvals,yvals)</code></pre>
 <p>Compare means:</p>
+<pre class="r"><code>qdac$means</code></pre>
 <pre><code>## # A tibble: 3 x 4
-##          x1        x2        x3        x4
-##       &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-## 1 0.6324582 1.2258507 1.2018392 0.8388529
-## 2 0.3347927 0.9673426 0.6779203 1.3636550
-## 3 0.6537071 1.2983617 0.3155651 0.8286490</code></pre>
-<pre><code>##           [,1]      [,2]       [,3]      [,4]
-## [1,] 0.7997764 1.2827608 1.37497064 1.0181986
-## [2,] 0.2132481 0.8254319 0.52877473 1.3231940
-## [3,] 0.5059780 1.2141116 0.08151392 0.7525699</code></pre>
-<pre><code>## [1] 0.02013806</code></pre>
+##          x1       x2        x3          x4
+##       &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
+## 1 0.7787897 1.163347 0.2980462 -0.04637183
+## 2 1.5079579 1.439564 0.1173405  0.52090670
+## 3 0.8170289 1.158257 0.6954892  1.27870699</code></pre>
+<pre class="r"><code>df$means</code></pre>
+<pre><code>##           [,1]     [,2]      [,3]       [,4]
+## [1,] 0.9317979 1.279922 0.4470687 0.09167857
+## [2,] 1.4777953 1.472568 0.2471039 0.55351572
+## [3,] 0.6858041 1.183848 0.5042580 1.07656217</code></pre>
+<pre class="r"><code>mean((qdac$means - df$means)^2)</code></pre>
+<pre><code>## [1] 0.01612288</code></pre>
 <p>Okay covariances:</p>
+<pre class="r"><code>qdac$covariance</code></pre>
 <pre><code>## , , 1
 ## 
 ##           [,1]      [,2]      [,3]      [,4]
-## [1,] 1.7227836 0.9179701 1.2345697 1.6922110
-## [2,] 0.5796946 0.6287344 0.7024527 0.3499463
-## [3,] 1.8530112 1.0519542 1.5087156 1.4740445
+## [1,] 1.4158394 1.1334065 1.0970920 0.8882161
+## [2,] 1.2540852 0.6166657 0.8077653 0.7639951
+## [3,] 0.9683113 0.2812939 0.9617476 0.9076079
 ## 
 ## , , 2
 ## 
 ##           [,1]      [,2]      [,3]      [,4]
-## [1,] 0.9179701 0.8254741 0.6196586 1.0186446
-## [2,] 0.6287344 1.1766568 1.3073433 0.5820323
-## [3,] 1.0519542 1.1721998 1.0792939 1.0194728
+## [1,] 1.1334065 0.9214697 0.7835320 0.6775906
+## [2,] 0.6166657 0.3498660 0.5008618 0.4019512
+## [3,] 0.2812939 0.3988928 0.5578471 0.5178832
 ## 
 ## , , 3
+## 
+##           [,1]      [,2]      [,3]      [,4]
+## [1,] 1.0970920 0.7835320 1.5400096 1.0487399
+## [2,] 0.8077653 0.5008618 0.8249412 0.5723715
+## [3,] 0.9617476 0.5578471 1.7612132 1.3955269
+## 
+## , , 4
+## 
+##           [,1]      [,2]      [,3]      [,4]
+## [1,] 0.8882161 0.6775906 1.0487399 1.2141321
+## [2,] 0.7639951 0.4019512 0.5723715 0.4917153
+## [3,] 0.9076079 0.5178832 1.3955269 1.6362707</code></pre>
+<pre class="r"><code>df$covariance</code></pre>
+<pre><code>## , , 1
+## 
+##          [,1]      [,2]      [,3]      [,4]
+## [1,] 1.370216 1.0844563 1.1783696 0.9716669
+## [2,] 1.139400 0.5683504 0.7545058 0.7093232
+## [3,] 1.079272 0.3149001 1.1023029 1.1021120
+## 
+## , , 2
+## 
+##           [,1]      [,2]      [,3]      [,4]
+## [1,] 1.0844563 0.8785099 0.7994236 0.7221854
+## [2,] 0.5683504 0.3361817 0.4940794 0.3845659
+## [3,] 0.3149001 0.3498849 0.5131902 0.5031997
+## 
+## , , 3
+## 
+##           [,1]      [,2]      [,3]     [,4]
+## [1,] 1.1783696 0.7994236 1.9559433 1.314325
+## [2,] 0.7545058 0.4940794 0.8582034 0.563073
+## [3,] 1.1023029 0.5131902 1.8375400 1.564863
+## 
+## , , 4
 ## 
 ##           [,1]      [,2]     [,3]      [,4]
-## [1,] 1.2345697 0.6196586 1.087045 1.2683379
-## [2,] 0.7024527 1.3073433 1.494686 0.5836427
-## [3,] 1.5087156 1.0792939 1.829178 1.4618169
-## 
-## , , 4
-## 
-##           [,1]      [,2]      [,3]     [,4]
-## [1,] 1.6922110 1.0186446 1.2683379 1.826681
-## [2,] 0.3499463 0.5820323 0.5836427 1.235218
-## [3,] 1.4740445 1.0194728 1.4618169 1.602993</code></pre>
-<pre><code>## , , 1
-## 
-##           [,1]      [,2]      [,3]     [,4]
-## [1,] 1.6582027 0.9124654 1.1293448 1.562883
-## [2,] 0.7264517 0.6846000 0.7450169 0.457667
-## [3,] 1.7612249 0.9577105 1.5357348 1.538494
-## 
-## , , 2
-## 
-##           [,1]      [,2]      [,3]      [,4]
-## [1,] 0.9124654 0.8727631 0.5866402 0.9567126
-## [2,] 0.6846000 1.1228287 1.2065897 0.5385065
-## [3,] 0.9577105 1.0069415 0.9308282 1.0057281
-## 
-## , , 3
-## 
-##           [,1]      [,2]      [,3]      [,4]
-## [1,] 1.1293448 0.5866402 0.9811474 1.1159618
-## [2,] 0.7450169 1.2065897 1.3422213 0.5260272
-## [3,] 1.5357348 0.9308282 1.8807005 1.4766924
-## 
-## , , 4
-## 
-##          [,1]      [,2]      [,3]     [,4]
-## [1,] 1.562883 0.9567126 1.1159618 1.606888
-## [2,] 0.457667 0.5385065 0.5260272 1.265851
-## [3,] 1.538494 1.0057281 1.4766924 1.702868</code></pre>
-<pre><code>## [1] 0.008564553</code></pre>
+## [1,] 0.9716669 0.7221854 1.314325 1.5019319
+## [2,] 0.7093232 0.3845659 0.563073 0.4706536
+## [3,] 1.1021120 0.5031997 1.564863 1.7985499</code></pre>
+<pre class="r"><code>mean((qdac$covariance-df$covariance)^2)</code></pre>
+<pre><code>## [1] 0.01448749</code></pre>
 <p>Great those estimates look okay. How are the predictions:</p>
+<pre class="r"><code>df = generate_qda_clusters(2,5,400)
+xvals = df$data[,1:5]
+yvals = df$data[,6]
+#shuffle our data
+num_samples = dim(xvals)[1]
+perm = sample(1:num_samples)
+xvals = xvals[perm,]
+yvals = yvals[perm,]
+
+#split it into training and test sets
+split = (num_samples * 9) %/% 10
+tr_xvals = xvals[1:split,]
+test_xvals = xvals[(split+1):num_samples, ]
+tr_yvals = yvals[1:split,]
+test_yvals = yvals[(split+1):num_samples,]
+
+#Fit our classifier
+qdac = QDAClassifier(tr_xvals, tr_yvals)
+tr_preds = as.matrix(apply(tr_xvals, 1, qdac$prediction))
+test_preds = as.matrix(apply(test_xvals,1,qdac$prediction))
+
+# Compare with LDA
+ldac = LDAClassifier(tr_xvals, tr_yvals)
+tr_preds2 = as.matrix(apply(tr_xvals, 1, ldac$prediction))
+test_preds2 = as.matrix(apply(test_xvals,1,ldac$prediction))</code></pre>
 <p>Let’s see how we did</p>
+<pre class="r"><code>output = tibble(LDA = c(mean(tr_preds2 == tr_yvals), mean(test_preds2 == test_yvals)), QDA = c(mean(tr_preds == tr_yvals), mean(test_preds == test_yvals)))
+output</code></pre>
 <pre><code>## # A tibble: 2 x 2
 ##         LDA       QDA
 ##       &lt;dbl&gt;     &lt;dbl&gt;
-## 1 0.8388889 0.9638889
-## 2 0.8375000 0.9500000</code></pre>
+## 1 0.9597222 0.9930556
+## 2 0.9625000 1.0000000</code></pre>
 <p>Digits</p>
+<pre class="r"><code>library(keras)
+mnist = dataset_mnist()
+to_sample = 1:10000
+x_train = mnist$train$x
+x_train = array_reshape(x_train, c(nrow(x_train),784))
+pca = prcomp(x_train[to_sample,], rank.=30)
+tt = pca$x
+y_train = mnist$train$y+1
+ldac = LDAClassifier(tt, y_train[to_sample])
+qdac = QDAClassifier(tt, y_train[to_sample])
+tr_preds = apply(tt, 1, ldac$prediction)
+tr_preds2 = apply(tt, 1, qdac$prediction)
+lda_tr = mean(tr_preds == y_train[to_sample])
+qda_tr = mean(tr_preds2 == y_train[to_sample])</code></pre>
 <p>Try this on test data</p>
+<pre class="r"><code>to_test = 1:10000
+x_test = mnist$test$x
+x_test = array_reshape(x_test, c(nrow(x_test),784))
+ttt = predict(pca, x_test[to_test,])
+y_test = mnist$test$y+1
+test_preds = apply(ttt, 1, ldac$prediction)
+test_preds2 = apply(ttt, 1, qdac$prediction)
+lda_test = mean(test_preds == y_test[to_test])
+qda_test = mean(test_preds2 == y_test[to_test])
+output = tibble(LDA = c(lda_tr, lda_test), QDA = c(qda_tr, qda_test))
+output</code></pre>
 <pre><code>## # A tibble: 2 x 2
 ##      LDA    QDA
 ##    &lt;dbl&gt;  &lt;dbl&gt;

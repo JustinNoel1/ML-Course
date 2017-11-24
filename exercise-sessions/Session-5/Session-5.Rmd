@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F)
+knitr::opts_chunk$set(echo = T, warning=F, message=F)
 ```
 
 ## R Lab
@@ -147,7 +147,7 @@ df$means
 ldac$means
 ```
 ```{r}
-ldac$means-df$means
+mean((ldac$means-df$means)^2)
 ```
 
 That looks okay. Although ramping up the number of samples would help confirm this.
@@ -161,7 +161,7 @@ df$covariance
 ldac$covariance
 ```
 ```{r}
-df$covariance-ldac$covariance
+mean((df$covariance-ldac$covariance)^2)
 ```
 
 Okay. Let's test the predictions.
