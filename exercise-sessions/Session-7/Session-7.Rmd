@@ -178,7 +178,7 @@ logc = LogisticClassifier(x_train, y_train)
 ```
 
 ```{r}
-for(i in 1:1000) {
+for(i in 1:2000) {
   logc$train_on_batch(batch_size = 512, verbose = T,learning_rate = 0.1)
 }
 ```
