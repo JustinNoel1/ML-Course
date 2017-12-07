@@ -1,0 +1,195 @@
+---
+title: "Problem Session 7"
+author: "Justin Noel"
+date: "12/7/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
+```
+
+## R Lab
+
+Let's build a simple logistic regression classifier from scratch.
+
+Let's first include our libraries.
+```{r}
+library(tidyverse)
+library(R6)
+```
+
+Data generator:
+```{r}
+generate_lda_clusters = function(classes, dim, num_samples) {
+  # generate a non-degenerate covariance matrix
+  repeat{
+    A = matrix(runif(dim^2),dim,dim)  
+    cov_mat = A%*%t(A)
+    if(det(cov_mat)!=0)
+      break
+  }
+  # generate means
+  means = matrix(1.5*runif(dim*classes),dim,classes)
+  
+  #initialize data frame
+  xvals = matrix(numeric(dim*classes*num_samples), num_samples*classes, dim)
+  y = matrix(numeric(classes*num_samples),classes*num_samples, 1)
+  t = as.tibble(cbind(xvals,y))
+  colnames(t)=c(paste0('x',1:dim),'y')
+  
+  # Fill data frame
+  for(ix in 0:(num_samples*classes-1)) {
+      c = (ix %/% num_samples)+1
+      t[(ix+1),]=c(mvrnorm(1,means[,c],cov_mat),c)
+  }
+  # Generate output
+  output = list(data = t, means = t(means), covariance = cov_mat)
+  return(output)
+}
+```
+
+Generate our data:
+```{r}
+df = generate_lda_clusters(2,20,1000)
+xvals = df$data[,1:20]
+yvals = df$data[,21]
+```
+Now I'm going to add some convenience functions:
+```{r}
+bias = function(x) { 
+  num_times = dim(x)[1]
+  as.matrix(cbind(x,rep(1,num_times)))
+  }
+
+OHE = function(x) {
+  #Get list of unique entries
+  values = unique(sort(x))
+  num_values = length(values)
+  encoder = function(z){
+    #find index
+    ix = match(z,values)
+    #initialize zero vector
+    v = numeric(num_values)
+    v[ix]=1
+    return(v)
+  }
+  
+  #vectorized encoder
+  function(y) {
+    matrix(unlist(map(y,encoder)),length(y),num_values,byrow=T)
+    
+  }
+}
+
+Scaler = function(x) {
+  num_samples = dim(x)[1]
+  num_features = dim(x)[2]
+  means = numeric(num_features)
+  vars = numeric(num_features)
+  
+  #calculate means
+  
+  means = apply(x, 2, mean)
+  vars = apply(x, 2, var)
+  
+  function(z) {
+    if(dim(z)[2]!=num_features) stop("Attempt to transform data with the incorrect number of features")
+    
+    num_to_transform = dim(z)[1]
+    for(col in seq(num_features)) {
+      for(row in seq(num_to_transform)) {
+        z[row,col] = (z[row,col]-means[col])/sqrt(vars[col])
+      }
+    }
+    return(z)
+  }
+}
+```
+
+I'm going to try to implement this as an ultralightweight "object", by which I just mean an environment. This loses some of the functionality of R6 classes, but is simpler syntactically. 
+
+```{r}
+LogisticClassifier = function(tr_data, tr_labels, rescale = T, add_bias = T, one_hot_encode = T , prior_std_dev = 0.1) {
+  num_samples = dim(tr_data)[1]
+
+  #transform our input
+  #if(rescale) {
+  #  scaler = Scaler(tr_data)
+  #  tr_data = scaler(tr_data)
+  #}  
+  #if(add_bias) {  tr_data = bias(tr_data)  }
+  
+  num_features = dim(tr_data)[2]
+  
+  #if(one_hot_encode) {
+  #  ohe = OHE(tr_labels)
+  #  tr_labels = ohe(tr_labels)
+  #}
+  
+  num_classes = dim(tr_labels)[2]
+  
+  beta = matrix(rnorm(num_features*num_classes)*prior_std_dev, num_features, num_classes)
+  
+  # Shuffle rows
+  #shuffle = sample.int(num_samples)
+  #tr_data = tr_data[shuffle, ]
+  #tr_labels = tr_labels[shuffle, ]
+  
+  train_counter = 0
+  probs = function(x, rescale = rescale, add_bias = add_bias) {
+    batch_size = dim(x)[1]
+    if(rescale) { x = scaler(x) }
+    if(add_bias) { x = bias(x) }
+    prbs = exp(x %*% beta)
+    for(row in seq(batch_size))
+      prbs[row,]=prbs[row,]/sum(prbs[row,])
+    return(as.matrix(prbs))
+  }
+  
+  train_on_batch = function(batch_size = 128, learning_rate = 0.1 , verbose = F) {
+    to_select = ((train_counter+seq(0,batch_size-1)) %% num_samples)+1
+    
+    data = as.matrix(tr_data[to_select,])
+    labels = as.matrix(tr_labels[to_select,])
+    multiplicand = probs(data, rescale = F, add_bias = F)
+    beta <<- beta+learning_rate*(t(data)%*%(labels-multiplicand))/batch_size
+    train_counter <<- train_counter+batch_size
+    if(verbose) {
+      acc_counter = 0
+      for(i in seq(batch_size))
+        if(which.max(multiplicand[i,])==which.max(labels[i]))
+          acc_counter = acc_counter+1
+      multiplicand = apply(multiplicand,c(1,2), function(x) max(x, exp(-20)))
+      error = -sum(log(multiplicand%*%t(labels)))/batch_size
+      print("Error after ")
+      print(train_counter)
+      print("is:")
+      print(error)
+      print("Accuracy is ")
+      print(acc_counter / batch_size)
+      print((multiplicand%*%t(labels))[1:2,])
+    }
+  }
+  environment()
+}
+```
+
+Test it out.
+```{r}
+transx= bias(xvals)
+transx[1:2,]
+sc = Scaler(xvals)
+tc = sc(xvals)
+tc[1:2,]
+ohe = OHE(yvals$y)
+ty = ohe(yvals$y)
+logc = LogisticClassifier(tc, ty, add_bias = T)
+```
+```{r}
+for(i in 1:1000) {
+  logc$train_on_batch(batch_size = 512, verbose = T,learning_rate = 0.0001)
+  print(logc$beta[1,])
+}
+```
+

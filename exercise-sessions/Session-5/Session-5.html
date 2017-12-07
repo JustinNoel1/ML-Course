@@ -193,7 +193,12 @@ B[,]</code></pre>
   means = t %&gt;%
     group_by(y) %&gt;%
     summarize_all(.funs = c(mean))
+  class_counts = t %&gt;% 
+    group_by(y) %&gt;% 
+    summarize(n = n())
+  
   num_classes = dim(means)[1]
+  class_densities = class_counts[,&quot;n&quot;]/num_samples
   
   #calculate covariance matrix
   cov_mat = matrix(numeric(num_features*num_features),num_features,num_features)
@@ -216,9 +221,9 @@ B[,]</code></pre>
       mu = as.matrix(means[c,2:(num_features+1)], ncol = num_features, nrow = 1)
       vec = ve-mu
       exponent = - vec %*% prec_mat %*% t(vec) / 2
-      prbs[c]=exp(exponent)/denominator
+      prbs[c]=class_densities[c,&quot;n&quot;]*exp(exponent)/denominator
     }
-    return(prbs)
+    return(prbs/sum(prbs))
   }
   
   prediction = function(x) {
@@ -265,34 +270,34 @@ ldac = LDAClassifier(xvals,yvals)</code></pre>
 <p>Compare means</p>
 <pre class="r"><code>df$means</code></pre>
 <pre><code>##           [,1]     [,2]      [,3]      [,4]
-## [1,] 0.5101013 0.978513 0.9386442 0.4911195
-## [2,] 0.0278312 1.206325 0.9372495 0.4147086
-## [3,] 0.4433162 1.289720 0.4502362 0.6973826</code></pre>
+## [1,] 0.6243502 1.420013 0.4336232 0.1992446
+## [2,] 0.5815792 1.206550 0.1535535 1.1838875
+## [3,] 1.2271042 0.767359 0.7589738 0.7713995</code></pre>
 <pre class="r"><code>ldac$means</code></pre>
 <pre><code>## # A tibble: 3 x 4
-##           x1        x2        x3        x4
-##        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-## 1 0.38972562 0.8821986 0.8613887 0.3436112
-## 2 0.01451382 1.1908754 0.9342209 0.4288744
-## 3 0.45178670 1.2878750 0.4848533 0.7750743</code></pre>
+##          x1        x2         x3        x4
+##       &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+## 1 0.5093099 1.2996919 0.28967376 0.1123002
+## 2 0.3419276 1.0929776 0.02569435 1.1802027
+## 3 1.3674661 0.9281932 0.91555190 0.8119578</code></pre>
 <pre class="r"><code>mean((ldac$means-df$means)^2)</code></pre>
-<pre><code>## [1] 0.00495244</code></pre>
+<pre><code>## [1] 0.01786801</code></pre>
 <p>That looks okay. Although ramping up the number of samples would help confirm this.</p>
 <p>How about the covariance matrices:</p>
 <pre class="r"><code>df$covariance</code></pre>
-<pre><code>##           [,1]      [,2]      [,3]      [,4]
-## [1,] 1.8753805 1.5801485 1.0815625 0.8991559
-## [2,] 1.5801485 1.3360393 0.9036398 0.7217824
-## [3,] 1.0815625 0.9036398 0.6561120 0.5328054
-## [4,] 0.8991559 0.7217824 0.5328054 0.9273198</code></pre>
+<pre><code>##          [,1]      [,2]     [,3]      [,4]
+## [1,] 2.492793 1.5222554 2.050297 1.1542424
+## [2,] 1.522255 1.2943944 1.552981 0.8203977
+## [3,] 2.050297 1.5529811 2.003113 1.2029718
+## [4,] 1.154242 0.8203977 1.202972 0.9376298</code></pre>
 <pre class="r"><code>ldac$covariance</code></pre>
-<pre><code>##           x1        x2        x3        x4
-## x1 1.8890856 1.5905602 1.1071007 0.8717394
-## x2 1.5905602 1.3439494 0.9241713 0.6989443
-## x3 1.1071007 0.9241713 0.6823120 0.5211170
-## x4 0.8717394 0.6989443 0.5211170 0.9083977</code></pre>
+<pre><code>##          x1        x2       x3        x4
+## x1 2.463805 1.5122608 1.997851 1.0651251
+## x2 1.512261 1.3364098 1.569491 0.7962582
+## x3 1.997851 1.5694912 1.983710 1.1569529
+## x4 1.065125 0.7962582 1.156953 0.9116208</code></pre>
 <pre class="r"><code>mean((df$covariance-ldac$covariance)^2)</code></pre>
-<pre><code>## [1] 0.0004049324</code></pre>
+<pre><code>## [1] 0.001949336</code></pre>
 <p>Okay. Let’s test the predictions.</p>
 <pre class="r"><code>preds = apply(xvals, 1, ldac$prediction)
 mean(preds == yvals)</code></pre>
@@ -318,7 +323,7 @@ test_yvals = yvals[(split+1):num_samples,]
 ldac = LDAClassifier(tr_xvals, tr_yvals)
 preds = apply(test_xvals, 1, ldac$prediction)
 mean(preds == test_yvals)</code></pre>
-<pre><code>## [1] 0.98125</code></pre>
+<pre><code>## [1] 0.74375</code></pre>
 <p>Okay, onto QDA:</p>
 <pre class="r"><code>QDAClassifier = function(x,y) {
   num_features = dim(x)[2]
@@ -338,6 +343,7 @@ mean(preds == test_yvals)</code></pre>
   cov_mats = array(numeric(num_classes*num_features^2), dim = c(num_classes, num_features, num_features))
   prec_mats = array(dim = c(num_classes, num_features, num_features))
   denominators = numeric(num_classes)
+  class_densities = numeric(num_classes)
   for(c in 1:num_classes) {
     #get the samples in the class
     class_samples = t %&gt;%
@@ -345,6 +351,7 @@ mean(preds == test_yvals)</code></pre>
       dplyr::select(-y)
     
     num_in_class = dim(class_samples)[1]
+    class_densities[c] = num_in_class/num_samples
     
     for(ix in 1:num_in_class) {
       #get vector
@@ -368,9 +375,9 @@ mean(preds == test_yvals)</code></pre>
       mu = as.matrix(means[c,2:(num_features+1)], ncol = num_features, nrow = 1)
       vec = ve-mu
       exponent = - vec %*% prec_mats[c,,] %*% t(vec) / 2
-      prbs[c]=exp(exponent)/denominators[c]
+      prbs[c]=class_densities[c]*exp(exponent)/denominators[c]
     }
-    return(prbs)
+    return(prbs/sum(prbs))
   }
   
   prediction = function(x) {
@@ -421,77 +428,77 @@ qdac = QDAClassifier(xvals,yvals)</code></pre>
 <p>Compare means:</p>
 <pre class="r"><code>qdac$means</code></pre>
 <pre><code>## # A tibble: 3 x 4
-##           x1        x2        x3        x4
-##        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-## 1 0.08260264 0.4301034 0.1457182 0.8632887
-## 2 1.62192712 1.0937153 0.6649225 0.2333357
-## 3 0.99022041 0.4829438 1.2868795 0.5151341</code></pre>
+##            x1         x2        x3        x4
+##         &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1  0.78317503 0.69442374 0.4528643 1.2860835
+## 2  0.45879191 0.29968548 1.6157793 1.1897670
+## 3 -0.04417918 0.06085617 0.5866799 0.4330927</code></pre>
 <pre class="r"><code>df$means</code></pre>
-<pre><code>##           [,1]      [,2]      [,3]      [,4]
-## [1,] 0.2111792 0.5984161 0.3451419 0.8686134
-## [2,] 1.4986965 1.0632256 0.5463299 0.1748167
-## [3,] 0.7605555 0.1218101 0.8682180 0.2659771</code></pre>
+<pre><code>##             [,1]      [,2]      [,3]      [,4]
+## [1,] 0.800832272 0.6474702 0.4139391 1.3330797
+## [2,] 0.283515798 0.2062109 1.4813223 1.0124537
+## [3,] 0.003985706 0.1213724 0.6076892 0.4372306</code></pre>
 <pre class="r"><code>mean((qdac$means - df$means)^2)</code></pre>
-<pre><code>## [1] 0.04489864</code></pre>
+<pre><code>## [1] 0.00847156</code></pre>
 <p>Okay covariances:</p>
 <pre class="r"><code>qdac$covariance</code></pre>
 <pre><code>## , , 1
 ## 
-##           [,1]      [,2]     [,3]      [,4]
-## [1,] 0.7020239 1.1557111 1.116209 0.2763056
-## [2,] 1.1591497 0.8529673 1.013734 0.4396454
-## [3,] 1.2527756 1.5844386 1.282907 0.9630064
+##           [,1]      [,2]      [,3]      [,4]
+## [1,] 1.8115512 0.8765856 1.3322019 1.9512140
+## [2,] 1.7653149 0.8600459 1.0254679 1.8575524
+## [3,] 0.5560875 1.1204580 0.6557478 0.6007122
 ## 
 ## , , 2
 ## 
-##           [,1]      [,2]     [,3]      [,4]
-## [1,] 1.1557111 2.4098661 2.279968 0.6962249
-## [2,] 0.8529673 0.9934195 1.062523 0.7691141
-## [3,] 1.5844386 2.3884430 2.228916 1.4798311
+##           [,1]      [,2]      [,3]      [,4]
+## [1,] 0.8765856 1.2820740 1.2323442 0.9491256
+## [2,] 0.8600459 0.9779031 0.7114489 1.2791569
+## [3,] 1.1204580 2.8157575 1.3606884 1.1409294
 ## 
 ## , , 3
 ## 
-##          [,1]     [,2]     [,3]      [,4]
-## [1,] 1.116209 2.279968 2.420025 0.7316594
-## [2,] 1.013734 1.062523 1.365315 1.0462900
-## [3,] 1.282907 2.228916 2.928235 2.1355284
+##           [,1]      [,2]      [,3]      [,4]
+## [1,] 1.3322019 1.2323442 1.5317367 1.4026206
+## [2,] 1.0254679 0.7114489 1.3148679 0.9829915
+## [3,] 0.6557478 1.3606884 0.8055115 0.7129734
 ## 
 ## , , 4
 ## 
-##           [,1]      [,2]      [,3]     [,4]
-## [1,] 0.2763056 0.6962249 0.7316594 0.604256
-## [2,] 0.4396454 0.7691141 1.0462900 1.091922
-## [3,] 0.9630064 1.4798311 2.1355284 1.962096</code></pre>
+##           [,1]      [,2]      [,3]      [,4]
+## [1,] 1.9512140 0.9491256 1.4026206 2.1732757
+## [2,] 1.8575524 1.2791569 0.9829915 2.3155702
+## [3,] 0.6007122 1.1409294 0.7129734 0.7189767</code></pre>
 <pre class="r"><code>df$covariance</code></pre>
 <pre><code>## , , 1
 ## 
-##           [,1]      [,2]      [,3]      [,4]
-## [1,] 0.6185236 0.9856408 0.9222466 0.2425210
-## [2,] 1.3226684 1.0053535 1.2490927 0.6222098
-## [3,] 1.2128638 1.4290042 1.0692735 0.8469089
+##           [,1]      [,2]      [,3]     [,4]
+## [1,] 1.8296867 1.0711365 1.5017612 2.014521
+## [2,] 1.6491370 0.7334512 0.9787895 1.653916
+## [3,] 0.4750984 0.9232184 0.5567519 0.525269
 ## 
 ## , , 2
 ## 
-##           [,1]     [,2]     [,3]      [,4]
-## [1,] 0.9856408 2.027609 1.894024 0.6192662
-## [2,] 1.0053535 1.101553 1.235157 0.8816886
-## [3,] 1.4290042 2.092696 1.891997 1.2578949
+##           [,1]      [,2]      [,3]      [,4]
+## [1,] 1.0711365 1.3855010 1.3654366 1.2016348
+## [2,] 0.7334512 0.8323822 0.6044258 1.0827879
+## [3,] 0.9232184 2.3586566 1.1229263 0.9705562
 ## 
 ## , , 3
 ## 
-##           [,1]     [,2]     [,3]      [,4]
-## [1,] 0.9222466 1.894024 2.014706 0.6885483
-## [2,] 1.2490927 1.235157 1.638747 1.2208347
-## [3,] 1.0692735 1.891997 2.520242 1.8370461
+##           [,1]      [,2]      [,3]      [,4]
+## [1,] 1.5017612 1.3654366 1.7152737 1.6411378
+## [2,] 0.9787895 0.6044258 1.3491215 0.8261720
+## [3,] 0.5567519 1.1229263 0.6840466 0.6287561
 ## 
 ## , , 4
 ## 
-##           [,1]      [,2]      [,3]      [,4]
-## [1,] 0.2425210 0.6192662 0.6885483 0.5889582
-## [2,] 0.6222098 0.8816886 1.2208347 1.1779506
-## [3,] 0.8469089 1.2578949 1.8370461 1.7613251</code></pre>
+##          [,1]      [,2]      [,3]     [,4]
+## [1,] 2.014521 1.2016348 1.6411378 2.281510
+## [2,] 1.653916 1.0827879 0.8261720 2.031651
+## [3,] 0.525269 0.9705562 0.6287561 0.662290</code></pre>
 <pre class="r"><code>mean((qdac$covariance-df$covariance)^2)</code></pre>
-<pre><code>## [1] 0.04631098</code></pre>
+<pre><code>## [1] 0.02889477</code></pre>
 <p>Great those estimates look okay. How are the predictions:</p>
 <pre class="r"><code>df = generate_qda_clusters(2,5,400)
 xvals = df$data[,1:5]
@@ -522,11 +529,11 @@ test_preds2 = as.matrix(apply(test_xvals,1,ldac$prediction))</code></pre>
 <pre class="r"><code>output = tibble(LDA = c(mean(tr_preds2 == tr_yvals), mean(test_preds2 == test_yvals)), QDA = c(mean(tr_preds == tr_yvals), mean(test_preds == test_yvals)))
 output</code></pre>
 <pre><code>## # A tibble: 2 x 2
-##         LDA       QDA
-##       &lt;dbl&gt;     &lt;dbl&gt;
-## 1 0.8166667 0.9819444
-## 2 0.8500000 0.9500000</code></pre>
-<p>Digits. For this we will first apply a PCA dimension reduction to our data. This both makes the problem more tractable and removes</p>
+##         LDA   QDA
+##       &lt;dbl&gt; &lt;dbl&gt;
+## 1 0.9583333     1
+## 2 0.9500000     1</code></pre>
+<p>Digits. For this we will first apply a PCA dimension reduction to our data. This both makes the problem more computationally accessible and will make our covariance matrix non-singular.</p>
 <pre class="r"><code>library(keras)
 mnist = dataset_mnist()
 to_sample = 1:10000
@@ -556,8 +563,8 @@ output</code></pre>
 <pre><code>## # A tibble: 2 x 2
 ##      LDA    QDA
 ##    &lt;dbl&gt;  &lt;dbl&gt;
-## 1 0.8551 0.9654
-## 2 0.8556 0.9566</code></pre>
+## 1 0.8552 0.9656
+## 2 0.8551 0.9568</code></pre>
 </div>
 
 

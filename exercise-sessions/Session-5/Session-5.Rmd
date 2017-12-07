@@ -62,7 +62,12 @@ LDAClassifier = function(x,y) {
   means = t %>%
     group_by(y) %>%
     summarize_all(.funs = c(mean))
+  class_counts = t %>% 
+    group_by(y) %>% 
+    summarize(n = n())
+  
   num_classes = dim(means)[1]
+  class_densities = class_counts[,"n"]/num_samples
   
   #calculate covariance matrix
   cov_mat = matrix(numeric(num_features*num_features),num_features,num_features)
@@ -85,9 +90,9 @@ LDAClassifier = function(x,y) {
       mu = as.matrix(means[c,2:(num_features+1)], ncol = num_features, nrow = 1)
       vec = ve-mu
       exponent = - vec %*% prec_mat %*% t(vec) / 2
-      prbs[c]=exp(exponent)/denominator
+      prbs[c]=class_densities[c,"n"]*exp(exponent)/denominator
     }
-    return(prbs)
+    return(prbs/sum(prbs))
   }
   
   prediction = function(x) {
@@ -214,6 +219,7 @@ QDAClassifier = function(x,y) {
   cov_mats = array(numeric(num_classes*num_features^2), dim = c(num_classes, num_features, num_features))
   prec_mats = array(dim = c(num_classes, num_features, num_features))
   denominators = numeric(num_classes)
+  class_densities = numeric(num_classes)
   for(c in 1:num_classes) {
     #get the samples in the class
     class_samples = t %>%
@@ -221,6 +227,7 @@ QDAClassifier = function(x,y) {
       dplyr::select(-y)
     
     num_in_class = dim(class_samples)[1]
+    class_densities[c] = num_in_class/num_samples
     
     for(ix in 1:num_in_class) {
       #get vector
@@ -244,9 +251,9 @@ QDAClassifier = function(x,y) {
       mu = as.matrix(means[c,2:(num_features+1)], ncol = num_features, nrow = 1)
       vec = ve-mu
       exponent = - vec %*% prec_mats[c,,] %*% t(vec) / 2
-      prbs[c]=exp(exponent)/denominators[c]
+      prbs[c]=class_densities[c]*exp(exponent)/denominators[c]
     }
-    return(prbs)
+    return(prbs/sum(prbs))
   }
   
   prediction = function(x) {
@@ -360,7 +367,7 @@ output = tibble(LDA = c(mean(tr_preds2 == tr_yvals), mean(test_preds2 == test_yv
 output
 ```
 
-Digits. For this we will first apply a PCA dimension reduction to our data. This both makes the problem more tractable and removes
+Digits. For this we will first apply a PCA dimension reduction to our data. This both makes the problem more computationally accessible and will make our covariance matrix non-singular.
 ```{r}
 library(keras)
 mnist = dataset_mnist()

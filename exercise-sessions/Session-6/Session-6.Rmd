@@ -1,0 +1,158 @@
+---
+title: "Problem Session 6"
+author: "Justin Noel"
+date: "12/7/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
+```
+
+## R Lab
+
+Here we will update our LDA classifier from last time to explicitly use the dimensionality reduction that is implicit in the underlying algorithm. 
+
+Now we will load some of our libraries:
+```{r}
+library(tidyverse)
+#Used for sampling from multivariate normal distribution
+library(MASS)
+#Used for OOP
+library(R6)
+```
+
+
+Since we are revisiting our old code anyway. Let's first beef it up and make it into an R6 object. Objects combine data and functions, allow us to control what parts of the interface we want the user to be able to interact with, and can be organized into a hierarchy to reduce redundant code.
+
+```{r}
+LDA_Classifier = R6Class(
+  "LDA Classifier",
+  
+  private = list(
+    samples = NULL,
+    labels = NULL,
+    tibble = NULL,
+    num_features = NULL,
+    num_samples  = NULL,
+    num_classes = NULL,
+    class_densities = NULL,
+    means = NULL,
+    denominator = NULL,
+    covariance_matrix = NULL,
+    precision_matrix = NULL),
+  
+  public = list(
+    initialize = function(x,y) {
+      private$num_features = dim(x)[2]
+      private$num_samples = dim(x)[1]
+      
+      #build df
+      private$tibble = as.tibble(cbind(x,y))
+      colnames(private$tibble)=c(paste0('x',1:private$num_features), 'y')
+      
+      #calculate group means
+      private$means = private$tibble %>%
+        group_by(y) %>%
+        summarize_all(.funs = c(mean))
+      class_counts = private$tibble %>% 
+        group_by(y) %>% 
+        summarize(n = n())
+      private$class_densities = class_counts[,"n"] / private$num_samples
+      private$num_classes = dim(private$means)[1]
+      
+      #calculate covariance matrix
+      cov_mat = matrix(numeric(private$num_features*private$num_features),private$num_features,private$num_features)
+      for(ix in 1:private$num_samples) {
+        #get vector
+        v = as.matrix(private$tibble[ix,1:private$num_features])
+        #center it
+        v = v-as.matrix(private$means[private$tibble[[ix,(private$num_features+1)]],
+                            2:(private$num_features+1)])
+        cov_mat = cov_mat + t(v) %*% v
+      }
+      private$covariance_matrix = cov_mat / (private$num_samples-private$num_features)
+      private$precision_matrix = solve(private$covariance_matrix)
+      private$denominator = (det(2*pi*private$covariance_matrix))^(0.5)
+    },
+    
+    #only do this for single classes
+    densities = function(x) {
+      ve = matrix(x,ncol=private$num_features,nrow = 1)
+      prbs = numeric(private$num_classes)
+      for(c in 1:private$num_classes) {
+        mu = as.matrix(private$means[c,2:(private$num_features+1)], 
+                       ncol = private$num_features, nrow = 1)
+        vec = ve-mu
+        exponent = - vec %*% private$precision_matrix %*% t(vec) / 2
+        prbs[c]=private$class_densities[c,1]*exp(exponent)/private$denominator
+      }
+      return(prbs/sum(prbs))
+    },
+    
+    prediction = function(x) {
+      dens = self$densities(x)
+      which(dens==max(dens))
+    }
+  ),
+  active = list(
+    mean = function() private$means[,2:(private$num_features+1)],
+    covariance = function() private$covariance_matrix
+  )
+)
+```
+
+
+Data generator:
+```{r}
+generate_lda_clusters = function(classes, dim, num_samples) {
+  # generate a non-degenerate covariance matrix
+  repeat{
+    A = matrix(runif(dim^2),dim,dim)  
+    cov_mat = A%*%t(A)
+    if(det(cov_mat)!=0)
+      break
+  }
+  # generate means
+  means = matrix(1.5*runif(dim*classes),dim,classes)
+  
+  #initialize data frame
+  xvals = matrix(numeric(dim*classes*num_samples), num_samples*classes, dim)
+  y = matrix(numeric(classes*num_samples),classes*num_samples, 1)
+  t = as.tibble(cbind(xvals,y))
+  colnames(t)=c(paste0('x',1:dim),'y')
+  
+  # Fill data frame
+  for(ix in 0:(num_samples*classes-1)) {
+      c = (ix %/% num_samples)+1
+      t[(ix+1),]=c(mvrnorm(1,means[,c],cov_mat),c)
+  }
+  # Generate output
+  output = list(data = t, means = t(means), covariance = cov_mat)
+  return(output)
+}
+```
+
+Generate our data:
+```{r}
+df = generate_lda_clusters(3,4,100)
+xvals = df$data[,1:4]
+yvals = df$data[,5]
+ldac = LDA_Classifier$new(xvals,yvals)
+```
+
+Test:
+```{r}
+df$means
+```
+```{r}
+ldac$mean
+```
+```{r}
+mean((ldac$mean-df$means)^2)
+```
+```{r}
+preds = apply(xvals, 1, ldac$prediction)
+mean(preds == yvals)
+```
+
