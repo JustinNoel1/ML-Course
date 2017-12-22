@@ -1,0 +1,125 @@
+---
+title: "Problem Session 9"
+author: "Justin Noel"
+date: "12/21/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = F, messsage = F)
+```
+
+## R Lab
+Okay the goal of this lab is to generate ROC curves and calculate the AUC for a function that outputs probabilities. 
+
+Load our libraries
+```{r}
+library(tidyverse)
+```
+Now let's build our functions. First let us construct the relevant dataframe
+```{r}
+ROC_Generator = function(probs, labels) {
+  df = tibble(probabilities = probs, labels = labels) %>%
+    arrange(probabilities) %>%
+    mutate(cum_positive = cumsum(labels))
+  num_samples = nrow(df)
+  num_positive = sum(select(df, labels))
+  num_negative = num_samples - num_positive
+  tpr = numeric(num_samples)
+  fpr = numeric(num_samples)
+  for(ix in seq(1,num_samples)) {
+    tpr[ix] = 1 - df[[ix,3]]/num_positive 
+    fpr[ix] = 1 - (ix-df[[ix,3]])/num_negative
+  }
+  df = add_column(df, fpr = fpr, tpr = tpr)
+  #add row for when the classifier always yields positive
+  df = add_row(df, fpr = 1, tpr = 1, .before = 1)
+  environment()
+}
+```
+Load predictions and data from LogisticClassifier on MNIST dataset. We will just look at the predicted probabilities for the 0 digit.
+```{r}
+zero_probs = preds[,1]
+zero_labels = y_test[,1]
+```
+Let's test this:
+```{r}
+log_roc = ROC_Generator(zero_probs, zero_labels)
+head(log_roc$df)
+```
+```{r}
+ggplot(data = log_roc$df, aes(x=fpr, y =tpr)) +geom_line()
+```
+
+Okay let us create the desired functions now.
+```{r}
+roc_object = function(probs, labels) {
+  roc_generator = ROC_Generator(probs,labels)
+  num_samples = length(probs)
+  df = roc_generator$df
+
+  tpr_fpr_matrix = function(num_data_points = (num_samples + 1) ) {
+    mat = matrix(numeric(num_data_points*2), num_data_points, 2)
+    # build sequence of points to check
+    s = seq(0,1,length.out=num_data_points)
+    matix = 1
+    ix = 2
+    # For each threshold value find the row in the data frame where the probability first is less than or equal to the threshold value
+    for(threshold in s) {
+      while((ix <= nrow(df)) & df[ix,1]>threshold) {
+        ix = ix+1
+      }
+      #load fpr and tpr in from previous row (which is the last below the threshold)
+      mat[matix,1]=df[[ix-1,4]]
+      mat[matix,2]=df[[ix-1,5]]
+      matix = matix+1
+    }
+    return(mat)
+  }
+  
+  better_tpr_fpr_matrix = function() {
+    return( as.matrix(select(df, fpr, tpr)))
+  }
+  print_graph = function(num_data_points = (num_samples + 1)) {
+    mat = tpr_fpr_matrix(num_data_points)
+    ggplot(aes(x=mat[,1], y = mat[,2])) + geom_line()
+  }
+  better_print_graph = function() {
+    ggplot(data = df, aes(x=fpr, y = tpr)) + geom_line()
+  }
+  
+  AUC = function(num_data_points = (num_samples+1)) {
+    mat = better_tpr_fpr_matrix()
+    area = 0
+    #Trapezoid method
+    for(ix in seq(2, nrow(mat))) {
+      dx = abs(mat[[ix-1,1]]-mat[[ix,1]])
+      area = area + 0.5 * dx * (mat[[ix-1,2]]+mat[[ix,2]])
+    }
+    return(area)
+  }
+  environment()
+}
+```
+
+Let us test this.
+```{r}
+log_roc = roc_object(zero_probs, zero_labels)
+m = log_roc$tpr_fpr_matrix()
+m[5000,]
+```
+It looks like this doesn't work so well because so many of the probabilities are so extreme. 
+
+Let's use a better version that is built around the probabilities we actually generate.
+```{r}
+n = log_roc$better_tpr_fpr_matrix()
+```
+That's better.
+```{r}
+log_roc$better_print_graph()
+```
+
+```{r}
+log_roc$AUC()
+```
+
