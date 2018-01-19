@@ -158,13 +158,12 @@ LogisticClassifier = function(tr_data, tr_labels, prior_std_dev = 0.1) {
 Test it out.
 Generate our data:
 ```{r}
-df = generate_lda_clusters(3,50,5000)
+df = generate_lda_clusters(3,30,1000)
 xvals = df$data[,1:30]
 yvals = df$data[,31]
 ```
 See how we do:
 ```{r}
-transx= bias(xvals)
 sc = Scaler(xvals)
 tc = bias(sc(xvals))
 ohe = OHE(yvals$y)

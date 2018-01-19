@@ -25,81 +25,61 @@ library(R6)
 
 Since we are revisiting our old code anyway. Let's first beef it up and make it into an R6 object. Objects combine data and functions, allow us to control what parts of the interface we want the user to be able to interact with, and can be organized into a hierarchy to reduce redundant code.
 
+We want to also transform our data to lie in an appropriate subspace of the $K-1$-plane containing the $K$ centroids of our clusters. Our desired $M$ dimensional subspace comes from inductively chosing 
+
 ```{r}
-LDA_Classifier = R6Class(
-  "LDA Classifier",
+LDAClassifier = function(x,y,dimension) {
+  num_features = dim(x)[2]
+  num_samples = dim(x)[1]
   
-  private = list(
-    samples = NULL,
-    labels = NULL,
-    tibble = NULL,
-    num_features = NULL,
-    num_samples  = NULL,
-    num_classes = NULL,
-    class_densities = NULL,
-    means = NULL,
-    denominator = NULL,
-    covariance_matrix = NULL,
-    precision_matrix = NULL),
+  #build df
+  t = as.tibble(cbind(x,y))
+  colnames(t)=c(paste0('x',1:num_features), 'y')
   
-  public = list(
-    initialize = function(x,y) {
-      private$num_features = dim(x)[2]
-      private$num_samples = dim(x)[1]
-      
-      #build df
-      private$tibble = as.tibble(cbind(x,y))
-      colnames(private$tibble)=c(paste0('x',1:private$num_features), 'y')
-      
-      #calculate group means
-      private$means = private$tibble %>%
-        group_by(y) %>%
-        summarize_all(.funs = c(mean))
-      class_counts = private$tibble %>% 
-        group_by(y) %>% 
-        summarize(n = n())
-      private$class_densities = class_counts[,"n"] / private$num_samples
-      private$num_classes = dim(private$means)[1]
-      
-      #calculate covariance matrix
-      cov_mat = matrix(numeric(private$num_features*private$num_features),private$num_features,private$num_features)
-      for(ix in 1:private$num_samples) {
-        #get vector
-        v = as.matrix(private$tibble[ix,1:private$num_features])
-        #center it
-        v = v-as.matrix(private$means[private$tibble[[ix,(private$num_features+1)]],
-                            2:(private$num_features+1)])
-        cov_mat = cov_mat + t(v) %*% v
-      }
-      private$covariance_matrix = cov_mat / (private$num_samples-private$num_features)
-      private$precision_matrix = solve(private$covariance_matrix)
-      private$denominator = (det(2*pi*private$covariance_matrix))^(0.5)
-    },
-    
-    #only do this for single classes
-    densities = function(x) {
-      ve = matrix(x,ncol=private$num_features,nrow = 1)
-      prbs = numeric(private$num_classes)
-      for(c in 1:private$num_classes) {
-        mu = as.matrix(private$means[c,2:(private$num_features+1)], 
-                       ncol = private$num_features, nrow = 1)
-        vec = ve-mu
-        exponent = - vec %*% private$precision_matrix %*% t(vec) / 2
-        prbs[c]=private$class_densities[c,1]*exp(exponent)/private$denominator
-      }
-      return(prbs/sum(prbs))
-    },
-    
-    prediction = function(x) {
-      dens = self$densities(x)
-      which(dens==max(dens))
+  #calculate group means
+  means = t %>%
+    group_by(y) %>%
+    summarize_all(.funs = c(mean))
+  class_counts = t %>% 
+    group_by(y) %>% 
+    summarize(n = n())
+  
+  num_classes = dim(means)[1]
+  class_densities = class_counts[,"n"]/num_samples
+  
+  #calculate covariance matrix
+  cov_mat = matrix(numeric(num_features*num_features),num_features,num_features)
+  for(ix in 1:num_samples) {
+    #get vector
+    v = as.matrix(t[ix,1:num_features])
+    #center it
+    v = v-as.matrix(means[t[[ix,(num_features+1)]],2:(num_features+1)])
+    cov_mat = cov_mat + t(v) %*% v
+  }
+  cov_mat = cov_mat / (num_samples-num_features)
+  prec_mat = solve(cov_mat)
+  denominator = (det(2*pi*cov_mat))^(0.5)
+  
+  #only do this for single classes
+  probs = function(x) {
+    ve = matrix(x,ncol=num_features,nrow = 1)
+    prbs = numeric(num_classes)
+    for(c in 1:num_classes) {
+      mu = as.matrix(means[c,2:(num_features+1)], ncol = num_features, nrow = 1)
+      vec = ve-mu
+      exponent = - vec %*% prec_mat %*% t(vec) / 2
+      prbs[c]=class_densities[c,"n"]*exp(exponent)/denominator
     }
-  ),
-  active = list(
-    mean = function() private$means[,2:(private$num_features+1)],
-    covariance = function() private$covariance_matrix
-  )
-)
+    return(prbs/sum(prbs))
+  }
+  
+  prediction = function(x) {
+    which(probs(x)==max(probs(x)))
+  }
+  
+  environment()
+  return(list(probs = probs, prediction = prediction, means = means[,2:(num_features+1)], covariance = cov_mat))
+}
 ```
 
 
