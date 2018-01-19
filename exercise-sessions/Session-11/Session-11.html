@@ -11794,7 +11794,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[249]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -11818,7 +11818,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="prompt input_prompt">In&nbsp;[250]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">big_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;UCI_Credit_Card.csv&quot;</span><span class="p">)</span>
@@ -11831,7 +11831,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="prompt input_prompt">In&nbsp;[251]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">big_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -11846,7 +11846,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 
 
 <div class="output_area">
-<div class="prompt output_prompt">Out[28]:</div>
+<div class="prompt output_prompt">Out[251]:</div>
 
 
 <div class="output_html rendered_html output_subarea output_execute_result">
@@ -12026,7 +12026,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[29]:</div>
+<div class="prompt input_prompt">In&nbsp;[252]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">big_df</span><span class="p">)</span>
@@ -12041,7 +12041,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 
 
 <div class="output_area">
-<div class="prompt output_prompt">Out[29]:</div>
+<div class="prompt output_prompt">Out[252]:</div>
 
 
 
@@ -12057,7 +12057,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="prompt input_prompt">In&nbsp;[253]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">big_df</span><span class="o">.</span><span class="n">dropna</span><span class="p">())</span>
@@ -12072,7 +12072,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 
 
 <div class="output_area">
-<div class="prompt output_prompt">Out[30]:</div>
+<div class="prompt output_prompt">Out[253]:</div>
 
 
 
@@ -12088,7 +12088,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="prompt input_prompt">In&nbsp;[254]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">big_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">],</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
@@ -12101,7 +12101,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="prompt input_prompt">In&nbsp;[255]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">labels</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;default.payment.next.month&#39;</span><span class="p">]</span>
@@ -12115,7 +12115,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="prompt input_prompt">In&nbsp;[256]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">num_samples</span> <span class="o">=</span> <span class="mi">25000</span>
@@ -12128,7 +12128,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="prompt input_prompt">In&nbsp;[257]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">train_x</span><span class="p">,</span> <span class="n">train_y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">num_samples</span><span class="p">],</span> <span class="n">labels</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">num_samples</span><span class="p">]</span>
@@ -12141,7 +12141,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="prompt input_prompt">In&nbsp;[258]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">test_x</span><span class="p">,</span> <span class="n">test_y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">num_samples</span><span class="p">:],</span> <span class="n">labels</span><span class="p">[</span><span class="n">num_samples</span><span class="p">:]</span>
@@ -12154,7 +12154,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="prompt input_prompt">In&nbsp;[259]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">test_x</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -12169,7 +12169,7 @@ One of the simplest ways is to add to our loss function an increasing function o
 
 
 <div class="output_area">
-<div class="prompt output_prompt">Out[48]:</div>
+<div class="prompt output_prompt">Out[259]:</div>
 
 
 <div class="output_html rendered_html output_subarea output_execute_result">
@@ -12349,10 +12349,10 @@ One of the simplest ways is to add to our loss function an increasing function o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="prompt input_prompt">In&nbsp;[260]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">train_y</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12364,34 +12364,19 @@ One of the simplest ways is to add to our loss function an increasing function o
 
 
 <div class="output_area">
-<div class="prompt"></div>
+<div class="prompt output_prompt">Out[260]:</div>
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>LIMIT_BAL
-SEX
-EDUCATION
-MARRIAGE
-AGE
-PAY_0
-PAY_2
-PAY_3
-PAY_4
-PAY_5
-PAY_6
-BILL_AMT1
-BILL_AMT2
-BILL_AMT3
-BILL_AMT4
-BILL_AMT5
-BILL_AMT6
-PAY_AMT1
-PAY_AMT2
-PAY_AMT3
-PAY_AMT4
-PAY_AMT5
-PAY_AMT6
-</pre>
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>0    1
+1    1
+2    0
+3    0
+4    0
+Name: default.payment.next.month, dtype: int64</pre>
 </div>
+
 </div>
 
 </div>
@@ -12410,15 +12395,24 @@ PAY_AMT6
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[62]:</div>
+<div class="prompt input_prompt">In&nbsp;[264]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">bin_transform</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
-    <span class="n">new</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="n">medians</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-        <span class="n">new</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">medians</span><span class="p">[</span><span class="n">col_name</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">new</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">bin_transformer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">num_quantiles</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quantiles</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">num_quantiles</span><span class="p">,</span> <span class="mf">1.</span><span class="o">-</span><span class="mf">1.</span><span class="o">/</span><span class="n">num_quantiles</span><span class="p">,</span><span class="n">num_quantiles</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            
+    
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">fns</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">ix</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantiles</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                <span class="n">quart</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span>
+                <span class="n">new</span><span class="p">[</span><span class="n">col_name</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">ix</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">quart</span><span class="p">)</span>
+                <span class="n">fns</span><span class="p">[</span><span class="n">col_name</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">ix</span><span class="p">)]</span> <span class="o">=</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">&gt;=</span><span class="n">quart</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new</span><span class="p">,</span> <span class="n">fns</span>
 </pre></div>
 
 </div>
@@ -12428,10 +12422,49 @@ PAY_AMT6
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[63]:</div>
+<div class="prompt input_prompt">In&nbsp;[265]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">bin_transform</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">transformer</span> <span class="o">=</span> <span class="n">bin_transformer</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[266]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">train_x_t</span><span class="p">,</span> <span class="n">tr_fns</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">train_x</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[267]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">test_x_t</span><span class="p">,</span> <span class="n">test_fns</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">test_x</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[268]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">train_x_t</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12443,7 +12476,7 @@ PAY_AMT6
 
 
 <div class="output_area">
-<div class="prompt output_prompt">Out[63]:</div>
+<div class="prompt output_prompt">Out[268]:</div>
 
 
 <div class="output_html rendered_html output_subarea output_execute_result">
@@ -12465,62 +12498,62 @@ PAY_AMT6
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>LIMIT_BAL</th>
-      <th>SEX</th>
-      <th>EDUCATION</th>
-      <th>MARRIAGE</th>
-      <th>AGE</th>
-      <th>PAY_0</th>
-      <th>PAY_2</th>
-      <th>PAY_3</th>
-      <th>PAY_4</th>
-      <th>PAY_5</th>
+      <th>LIMIT_BAL0.2</th>
+      <th>LIMIT_BAL0.4</th>
+      <th>LIMIT_BAL0.6</th>
+      <th>LIMIT_BAL0.8</th>
+      <th>SEX0.2</th>
+      <th>SEX0.4</th>
+      <th>SEX0.6</th>
+      <th>SEX0.8</th>
+      <th>EDUCATION0.2</th>
+      <th>EDUCATION0.4</th>
       <th>...</th>
-      <th>BILL_AMT3</th>
-      <th>BILL_AMT4</th>
-      <th>BILL_AMT5</th>
-      <th>BILL_AMT6</th>
-      <th>PAY_AMT1</th>
-      <th>PAY_AMT2</th>
-      <th>PAY_AMT3</th>
-      <th>PAY_AMT4</th>
-      <th>PAY_AMT5</th>
-      <th>PAY_AMT6</th>
+      <th>PAY_AMT40.6</th>
+      <th>PAY_AMT40.8</th>
+      <th>PAY_AMT50.2</th>
+      <th>PAY_AMT50.4</th>
+      <th>PAY_AMT50.6</th>
+      <th>PAY_AMT50.8</th>
+      <th>PAY_AMT60.2</th>
+      <th>PAY_AMT60.4</th>
+      <th>PAY_AMT60.6</th>
+      <th>PAY_AMT60.8</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
       <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
       <td>True</td>
       <td>True</td>
-      <td>False</td>
-      <td>False</td>
       <td>True</td>
       <td>True</td>
-      <td>False</td>
-      <td>False</td>
-      <td>False</td>
+      <td>True</td>
+      <td>True</td>
       <td>...</td>
       <td>False</td>
       <td>False</td>
+      <td>True</td>
       <td>False</td>
       <td>False</td>
       <td>False</td>
-      <td>False</td>
-      <td>False</td>
+      <td>True</td>
       <td>False</td>
       <td>False</td>
       <td>False</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>False</td>
-      <td>True</td>
       <td>True</td>
       <td>True</td>
       <td>False</td>
       <td>False</td>
+      <td>True</td>
+      <td>True</td>
       <td>True</td>
       <td>True</td>
       <td>True</td>
@@ -12528,21 +12561,21 @@ PAY_AMT6
       <td>...</td>
       <td>False</td>
       <td>False</td>
-      <td>False</td>
-      <td>False</td>
-      <td>False</td>
-      <td>False</td>
+      <td>True</td>
       <td>False</td>
       <td>False</td>
       <td>False</td>
       <td>True</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>2</th>
+      <td>True</td>
       <td>False</td>
-      <td>True</td>
-      <td>True</td>
-      <td>True</td>
+      <td>False</td>
+      <td>False</td>
       <td>True</td>
       <td>True</td>
       <td>True</td>
@@ -12552,20 +12585,20 @@ PAY_AMT6
       <td>...</td>
       <td>False</td>
       <td>False</td>
+      <td>True</td>
+      <td>True</td>
       <td>False</td>
       <td>False</td>
-      <td>False</td>
-      <td>False</td>
-      <td>False</td>
-      <td>False</td>
-      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
       <td>True</td>
     </tr>
     <tr>
       <th>3</th>
+      <td>True</td>
       <td>False</td>
-      <td>True</td>
-      <td>True</td>
+      <td>False</td>
       <td>False</td>
       <td>True</td>
       <td>True</td>
@@ -12574,26 +12607,26 @@ PAY_AMT6
       <td>True</td>
       <td>True</td>
       <td>...</td>
-      <td>True</td>
-      <td>True</td>
+      <td>False</td>
+      <td>False</td>
       <td>True</td>
       <td>True</td>
       <td>False</td>
+      <td>False</td>
       <td>True</td>
-      <td>False</td>
-      <td>False</td>
+      <td>True</td>
       <td>False</td>
       <td>False</td>
     </tr>
     <tr>
       <th>4</th>
+      <td>True</td>
+      <td>False</td>
       <td>False</td>
       <td>False</td>
       <td>True</td>
       <td>False</td>
-      <td>True</td>
       <td>False</td>
-      <td>True</td>
       <td>False</td>
       <td>True</td>
       <td>True</td>
@@ -12601,17 +12634,17 @@ PAY_AMT6
       <td>True</td>
       <td>True</td>
       <td>True</td>
-      <td>True</td>
+      <td>False</td>
+      <td>False</td>
       <td>False</td>
       <td>True</td>
-      <td>True</td>
-      <td>True</td>
+      <td>False</td>
       <td>False</td>
       <td>False</td>
     </tr>
   </tbody>
 </table>
-<p>5 rows × 23 columns</p>
+<p>5 rows × 92 columns</p>
 </div>
 </div>
 
@@ -12623,26 +12656,214 @@ PAY_AMT6
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[64]:</div>
+<div class="prompt input_prompt">In&nbsp;[269]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">train_x_t</span> <span class="o">=</span> <span class="n">bin_transform</span><span class="p">(</span><span class="n">train_x</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tr_fns</span>
 </pre></div>
 
 </div>
 </div>
 </div>
 
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+<div class="prompt output_prompt">Out[269]:</div>
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;AGE0.2&#39;: (&#39;AGE&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;AGE0.4&#39;: (&#39;AGE&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;AGE0.6&#39;: (&#39;AGE&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;AGE0.8&#39;: (&#39;AGE&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT10.2&#39;: (&#39;BILL_AMT1&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT10.4&#39;: (&#39;BILL_AMT1&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT10.6&#39;: (&#39;BILL_AMT1&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT10.8&#39;: (&#39;BILL_AMT1&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT20.2&#39;: (&#39;BILL_AMT2&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT20.4&#39;: (&#39;BILL_AMT2&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT20.6&#39;: (&#39;BILL_AMT2&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT20.8&#39;: (&#39;BILL_AMT2&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT30.2&#39;: (&#39;BILL_AMT3&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT30.4&#39;: (&#39;BILL_AMT3&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT30.6&#39;: (&#39;BILL_AMT3&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT30.8&#39;: (&#39;BILL_AMT3&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT40.2&#39;: (&#39;BILL_AMT4&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT40.4&#39;: (&#39;BILL_AMT4&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT40.6&#39;: (&#39;BILL_AMT4&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT40.8&#39;: (&#39;BILL_AMT4&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT50.2&#39;: (&#39;BILL_AMT5&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT50.4&#39;: (&#39;BILL_AMT5&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT50.6&#39;: (&#39;BILL_AMT5&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT50.8&#39;: (&#39;BILL_AMT5&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT60.2&#39;: (&#39;BILL_AMT6&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT60.4&#39;: (&#39;BILL_AMT6&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT60.6&#39;: (&#39;BILL_AMT6&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;BILL_AMT60.8&#39;: (&#39;BILL_AMT6&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;EDUCATION0.2&#39;: (&#39;EDUCATION&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;EDUCATION0.4&#39;: (&#39;EDUCATION&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;EDUCATION0.6&#39;: (&#39;EDUCATION&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;EDUCATION0.8&#39;: (&#39;EDUCATION&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;LIMIT_BAL0.2&#39;: (&#39;LIMIT_BAL&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;LIMIT_BAL0.4&#39;: (&#39;LIMIT_BAL&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;LIMIT_BAL0.6&#39;: (&#39;LIMIT_BAL&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;LIMIT_BAL0.8&#39;: (&#39;LIMIT_BAL&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;MARRIAGE0.2&#39;: (&#39;MARRIAGE&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;MARRIAGE0.4&#39;: (&#39;MARRIAGE&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;MARRIAGE0.6&#39;: (&#39;MARRIAGE&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;MARRIAGE0.8&#39;: (&#39;MARRIAGE&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_00.2&#39;: (&#39;PAY_0&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_00.4&#39;: (&#39;PAY_0&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_00.6&#39;: (&#39;PAY_0&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_00.8&#39;: (&#39;PAY_0&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_20.2&#39;: (&#39;PAY_2&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_20.4&#39;: (&#39;PAY_2&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_20.6&#39;: (&#39;PAY_2&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_20.8&#39;: (&#39;PAY_2&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_30.2&#39;: (&#39;PAY_3&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_30.4&#39;: (&#39;PAY_3&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_30.6&#39;: (&#39;PAY_3&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_30.8&#39;: (&#39;PAY_3&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_40.2&#39;: (&#39;PAY_4&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_40.4&#39;: (&#39;PAY_4&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_40.6&#39;: (&#39;PAY_4&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_40.8&#39;: (&#39;PAY_4&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_50.2&#39;: (&#39;PAY_5&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_50.4&#39;: (&#39;PAY_5&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_50.6&#39;: (&#39;PAY_5&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_50.8&#39;: (&#39;PAY_5&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_60.2&#39;: (&#39;PAY_6&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_60.4&#39;: (&#39;PAY_6&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_60.6&#39;: (&#39;PAY_6&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_60.8&#39;: (&#39;PAY_6&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT10.2&#39;: (&#39;PAY_AMT1&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT10.4&#39;: (&#39;PAY_AMT1&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT10.6&#39;: (&#39;PAY_AMT1&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT10.8&#39;: (&#39;PAY_AMT1&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT20.2&#39;: (&#39;PAY_AMT2&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT20.4&#39;: (&#39;PAY_AMT2&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT20.6&#39;: (&#39;PAY_AMT2&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT20.8&#39;: (&#39;PAY_AMT2&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT30.2&#39;: (&#39;PAY_AMT3&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT30.4&#39;: (&#39;PAY_AMT3&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT30.6&#39;: (&#39;PAY_AMT3&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT30.8&#39;: (&#39;PAY_AMT3&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT40.2&#39;: (&#39;PAY_AMT4&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT40.4&#39;: (&#39;PAY_AMT4&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT40.6&#39;: (&#39;PAY_AMT4&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT40.8&#39;: (&#39;PAY_AMT4&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT50.2&#39;: (&#39;PAY_AMT5&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT50.4&#39;: (&#39;PAY_AMT5&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT50.6&#39;: (&#39;PAY_AMT5&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT50.8&#39;: (&#39;PAY_AMT5&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT60.2&#39;: (&#39;PAY_AMT6&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT60.4&#39;: (&#39;PAY_AMT6&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT60.6&#39;: (&#39;PAY_AMT6&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;PAY_AMT60.8&#39;: (&#39;PAY_AMT6&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;SEX0.2&#39;: (&#39;SEX&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;SEX0.4&#39;: (&#39;SEX&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;SEX0.6&#39;: (&#39;SEX&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;),
+ &#39;SEX0.8&#39;: (&#39;SEX&#39;,
+  &lt;function __main__.bin_transformer.transform.&lt;locals&gt;.&lt;lambda&gt;&gt;)}</pre>
 </div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[65]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">test_x_t</span> <span class="o">=</span> <span class="n">bin_transform</span><span class="p">(</span><span class="n">test_x</span><span class="p">)</span>
-</pre></div>
 
 </div>
+
 </div>
 </div>
 
@@ -12659,7 +12880,7 @@ PAY_AMT6
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[100]:</div>
+<div class="prompt input_prompt">In&nbsp;[270]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">bdd_cross_entropy</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
@@ -12673,7 +12894,7 @@ PAY_AMT6
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[102]:</div>
+<div class="prompt input_prompt">In&nbsp;[271]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">MSE</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span><span class="n">label</span><span class="p">):</span>
@@ -12687,7 +12908,7 @@ PAY_AMT6
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[103]:</div>
+<div class="prompt input_prompt">In&nbsp;[272]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">acc</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span><span class="n">label</span><span class="p">):</span>
@@ -12711,12 +12932,13 @@ PAY_AMT6
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[97]:</div>
+<div class="prompt input_prompt">In&nbsp;[273]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">find_split</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">loss</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">find_split</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="n">min_ax</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">min_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">Inf</span>
+    <span class="n">base_loss</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">),</span><span class="n">y</span><span class="p">)</span> 
+    <span class="n">min_loss</span> <span class="o">=</span> <span class="n">base_loss</span>
     <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span>
@@ -12725,7 +12947,8 @@ PAY_AMT6
         <span class="n">pos_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span>
         <span class="n">neg_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">])</span>
         <span class="n">l</span> <span class="o">=</span> <span class="p">(</span><span class="n">num_pos</span><span class="o">*</span><span class="n">loss</span><span class="p">(</span><span class="n">pos_y</span><span class="p">,</span> <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span> <span class="o">+</span> <span class="n">num_neg</span><span class="o">*</span><span class="n">loss</span><span class="p">(</span><span class="n">neg_y</span><span class="p">,</span> <span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]))</span><span class="o">/</span><span class="n">N</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Column </span><span class="si">{0}</span><span class="s2"> split has loss </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">l</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Column </span><span class="si">{0}</span><span class="s2"> split has improved loss </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">base_loss</span><span class="o">-</span><span class="n">l</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">l</span> <span class="o">&lt;</span> <span class="n">min_loss</span><span class="p">:</span>
             <span class="n">min_loss</span> <span class="o">=</span> <span class="n">l</span>
             <span class="n">min_ax</span> <span class="o">=</span> <span class="n">col_name</span>
@@ -12740,10 +12963,10 @@ PAY_AMT6
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[98]:</div>
+<div class="prompt input_prompt">In&nbsp;[278]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">find_split</span><span class="p">(</span><span class="n">train_x_t</span><span class="p">,</span> <span class="n">train_y</span><span class="p">,</span> <span class="n">MSE</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">find_split</span><span class="p">(</span><span class="n">train_x_t</span><span class="p">,</span> <span class="n">train_y</span><span class="p">,</span> <span class="n">MSE</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12758,40 +12981,109 @@ PAY_AMT6
 <div class="prompt"></div>
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Column LIMIT_BAL split has loss 0.1695355209804491
-Column SEX split has loss 0.1731219496274674
-Column EDUCATION split has loss 0.17287344471965424
-Column MARRIAGE split has loss 0.17319265757975288
-Column AGE split has loss 0.173318892363075
-Column PAY_0 split has loss 0.1717514981906695
-Column PAY_2 split has loss 0.17202252471313842
-Column PAY_3 split has loss 0.17191765041495996
-Column PAY_4 split has loss 0.17223636307005985
-Column PAY_5 split has loss 0.17232129416490316
-Column PAY_6 split has loss 0.17253319155880448
-Column BILL_AMT1 split has loss 0.17325282560000002
-Column BILL_AMT2 split has loss 0.17330610559999998
-Column BILL_AMT3 split has loss 0.17333131520000003
-Column BILL_AMT4 split has loss 0.17333436800000004
-Column BILL_AMT5 split has loss 0.17332015999999997
-Column BILL_AMT6 split has loss 0.17327217920000001
-Column PAY_AMT1 split has loss 0.17086868146418618
-Column PAY_AMT2 split has loss 0.1709179393133935
-Column PAY_AMT3 split has loss 0.17150788901767042
-Column PAY_AMT4 split has loss 0.17158111512741983
-Column PAY_AMT5 split has loss 0.17182716874761556
-Column PAY_AMT6 split has loss 0.1717084738707335
+<pre>Column LIMIT_BAL0.2 split has improved loss 0.0032026111833937665
+Column LIMIT_BAL0.4 split has improved loss 0.0036568972936314725
+Column LIMIT_BAL0.6 split has improved loss 0.002968295613244798
+Column LIMIT_BAL0.8 split has improved loss 0.0017932272689534512
+Column SEX0.2 split has improved loss nan
+Column SEX0.4 split has improved loss 0.0002155159725325817
+Column SEX0.6 split has improved loss 0.0002155159725325817
+Column SEX0.8 split has improved loss 0.0002155159725325817
+Column EDUCATION0.2 split has improved loss 2.3907091916103296e-05
+Column EDUCATION0.4 split has improved loss 0.0004640208803457502
+Column EDUCATION0.6 split has improved loss 0.0004640208803457502
+Column EDUCATION0.8 split has improved loss 0.0004640208803457502
+Column MARRIAGE0.2 split has improved loss 3.249086770407139e-05
+Column MARRIAGE0.4 split has improved loss 3.249086770407139e-05
+Column MARRIAGE0.6 split has improved loss 0.00014480802024710582
+Column MARRIAGE0.8 split has improved loss 0.00014480802024710582
+Column AGE0.2 split has improved loss 0.00020827243409601848
+Column AGE0.4 split has improved loss 9.960157279997883e-06
+Column AGE0.6 split has improved loss 4.117947427031976e-05
+Column AGE0.8 split has improved loss 8.124558376762514e-05
+Column PAY_00.2 split has improved loss 0.0008308647297025351
+Column PAY_00.4 split has improved loss 0.0015859674093304799
+Column PAY_00.6 split has improved loss 0.0015859674093304799
+Column PAY_00.8 split has improved loss 0.0233441901232099
+Column PAY_20.2 split has improved loss 0.0001876302154459608
+Column PAY_20.4 split has improved loss 0.0013149408868615708
+Column PAY_20.6 split has improved loss 0.0013149408868615708
+Column PAY_20.8 split has improved loss 0.0013149408868615708
+Column PAY_30.2 split has improved loss 0.00021161990136722708
+Column PAY_30.4 split has improved loss 0.0014198151850400298
+Column PAY_30.6 split has improved loss 0.0014198151850400298
+Column PAY_30.8 split has improved loss 0.0014198151850400298
+Column PAY_40.2 split has improved loss 0.00014702668290195176
+Column PAY_40.4 split has improved loss 0.00110110252994014
+Column PAY_40.6 split has improved loss 0.00110110252994014
+Column PAY_40.8 split has improved loss 0.00110110252994014
+Column PAY_50.2 split has improved loss 0.00011619585491220996
+Column PAY_50.4 split has improved loss 0.0010161714350968298
+Column PAY_50.6 split has improved loss 0.0010161714350968298
+Column PAY_50.8 split has improved loss 0.0010161714350968298
+Column PAY_60.2 split has improved loss 8.712841444399877e-05
+Column PAY_60.4 split has improved loss 0.0008042740411955129
+Column PAY_60.6 split has improved loss 0.0008042740411955129
+Column PAY_60.8 split has improved loss 0.0008042740411955129
+Column BILL_AMT10.2 split has improved loss 2.7784178714379548e-05
+Column BILL_AMT10.4 split has improved loss 2.7479974147037733e-06
+Column BILL_AMT10.6 split has improved loss 0.00016119710076237248
+Column BILL_AMT10.8 split has improved loss 0.00014701547170556384
+Column BILL_AMT20.2 split has improved loss 3.084283179743963e-06
+Column BILL_AMT20.4 split has improved loss 8.943772085073798e-06
+Column BILL_AMT20.6 split has improved loss 9.726534850079682e-05
+Column BILL_AMT20.8 split has improved loss 0.00010606002405513792
+Column BILL_AMT30.2 split has improved loss 1.2923238124601388e-05
+Column BILL_AMT30.4 split has improved loss 1.7703438644989244e-05
+Column BILL_AMT30.6 split has improved loss 5.7255048681065235e-05
+Column BILL_AMT30.8 split has improved loss 0.0001309855396841031
+Column BILL_AMT40.2 split has improved loss 1.5757691495227322e-05
+Column BILL_AMT40.4 split has improved loss 4.552825379744441e-05
+Column BILL_AMT40.6 split has improved loss 1.5198874939420515e-05
+Column BILL_AMT40.8 split has improved loss 5.0114289508379484e-05
+Column BILL_AMT50.2 split has improved loss 2.5681591047099772e-05
+Column BILL_AMT50.4 split has improved loss 4.704167867383702e-05
+Column BILL_AMT50.6 split has improved loss 7.104706449934106e-06
+Column BILL_AMT50.8 split has improved loss 4.3105571633450523e-05
+Column BILL_AMT60.2 split has improved loss 1.1070212941444169e-05
+Column BILL_AMT60.4 split has improved loss 7.89154272805015e-05
+Column BILL_AMT60.6 split has improved loss 1.1814881573091185e-08
+Column BILL_AMT60.8 split has improved loss 2.5239692683282078e-05
+Column PAY_AMT10.2 split has improved loss 0.0037338214207645604
+Column PAY_AMT10.4 split has improved loss 0.0025958239617459855
+Column PAY_AMT10.6 split has improved loss 0.0026823429188202186
+Column PAY_AMT10.8 split has improved loss 0.0018958312033806879
+Column PAY_AMT20.2 split has improved loss 0.0026740961203186864
+Column PAY_AMT20.4 split has improved loss 0.002413157179305403
+Column PAY_AMT20.6 split has improved loss 0.0022468726365486025
+Column PAY_AMT20.8 split has improved loss 0.001975166038548831
+Column PAY_AMT30.2 split has improved loss 0.002428229767294232
+Column PAY_AMT30.4 split has improved loss 0.0017518742462117598
+Column PAY_AMT30.6 split has improved loss 0.0019701352550884066
+Column PAY_AMT30.8 split has improved loss 0.001262546288527816
+Column PAY_AMT40.2 split has improved loss nan
+Column PAY_AMT40.4 split has improved loss 0.0016828468720352097
+Column PAY_AMT40.6 split has improved loss 0.001992080354384307
+Column PAY_AMT40.8 split has improved loss 0.001509125693650304
+Column PAY_AMT50.2 split has improved loss nan
+Column PAY_AMT50.4 split has improved loss 0.0013987996480574194
+Column PAY_AMT50.6 split has improved loss 0.0015722436951876306
+Column PAY_AMT50.8 split has improved loss 0.0013770421197525917
+Column PAY_AMT60.2 split has improved loss nan
+Column PAY_AMT60.4 split has improved loss 0.0016595462220761747
+Column PAY_AMT60.6 split has improved loss 0.0019163958366781864
+Column PAY_AMT60.8 split has improved loss 0.0017002531220795536
 </pre>
 </div>
 </div>
 
 <div class="output_area">
-<div class="prompt output_prompt">Out[98]:</div>
+<div class="prompt output_prompt">Out[278]:</div>
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(&#39;LIMIT_BAL&#39;, 0.16953552098044911)</pre>
+<pre>(&#39;PAY_00.8&#39;, 0.14999327547679009)</pre>
 </div>
 
 </div>
@@ -12802,10 +13094,10 @@ Column PAY_AMT6 split has loss 0.1717084738707335
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[101]:</div>
+<div class="prompt input_prompt">In&nbsp;[279]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">find_split</span><span class="p">(</span><span class="n">train_x_t</span><span class="p">,</span> <span class="n">train_y</span><span class="p">,</span> <span class="n">bdd_cross_entropy</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">find_split</span><span class="p">(</span><span class="n">train_x_t</span><span class="p">,</span> <span class="n">train_y</span><span class="p">,</span> <span class="n">bdd_cross_entropy</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12817,43 +13109,12 @@ Column PAY_AMT6 split has loss 0.1717084738707335
 
 
 <div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Column LIMIT_BAL split has loss 0.32609324928399475
-Column SEX split has loss 0.33421127717335847
-Column EDUCATION split has loss 0.33362747952504695
-Column MARRIAGE split has loss 0.33436660837163695
-Column AGE split has loss 0.33464852355164837
-Column PAY_0 split has loss 0.3308843371730157
-Column PAY_2 split has loss 0.3316023603256719
-Column PAY_3 split has loss 0.331355010904273
-Column PAY_4 split has loss 0.3321193974158408
-Column PAY_5 split has loss 0.33232409957840303
-Column PAY_6 split has loss 0.3328343764615235
-Column BILL_AMT1 split has loss 0.334500432415302
-Column BILL_AMT2 split has loss 0.33461987645234526
-Column BILL_AMT3 split has loss 0.33467637691547464
-Column BILL_AMT4 split has loss 0.334683218289005
-Column BILL_AMT5 split has loss 0.3346513767448689
-Column BILL_AMT6 split has loss 0.3345438245879838
-Column PAY_AMT1 split has loss 0.3291165664664216
-Column PAY_AMT2 split has loss 0.3292922028001125
-Column PAY_AMT3 split has loss 0.33056481518410924
-Column PAY_AMT4 split has loss 0.3307374268541303
-Column PAY_AMT5 split has loss 0.33129857804153134
-Column PAY_AMT6 split has loss 0.3310218356358935
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt output_prompt">Out[101]:</div>
+<div class="prompt output_prompt">Out[279]:</div>
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(&#39;LIMIT_BAL&#39;, 0.32609324928399475)</pre>
+<pre>(&#39;PAY_00.8&#39;, 0.29117246034455752)</pre>
 </div>
 
 </div>
@@ -12864,10 +13125,10 @@ Column PAY_AMT6 split has loss 0.3310218356358935
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[104]:</div>
+<div class="prompt input_prompt">In&nbsp;[280]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">find_split</span><span class="p">(</span><span class="n">train_x_t</span><span class="p">,</span> <span class="n">train_y</span><span class="p">,</span> <span class="n">acc</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">find_split</span><span class="p">(</span><span class="n">train_x_t</span><span class="p">,</span> <span class="n">train_y</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12879,43 +13140,12 @@ Column PAY_AMT6 split has loss 0.3310218356358935
 
 
 <div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Column LIMIT_BAL split has loss 0.77688
-Column SEX split has loss 0.77688
-Column EDUCATION split has loss 0.77688
-Column MARRIAGE split has loss 0.77688
-Column AGE split has loss 0.77688
-Column PAY_0 split has loss 0.77688
-Column PAY_2 split has loss 0.77688
-Column PAY_3 split has loss 0.77688
-Column PAY_4 split has loss 0.77688
-Column PAY_5 split has loss 0.77688
-Column PAY_6 split has loss 0.77688
-Column BILL_AMT1 split has loss 0.77688
-Column BILL_AMT2 split has loss 0.77688
-Column BILL_AMT3 split has loss 0.77688
-Column BILL_AMT4 split has loss 0.77688
-Column BILL_AMT5 split has loss 0.77688
-Column BILL_AMT6 split has loss 0.77688
-Column PAY_AMT1 split has loss 0.77688
-Column PAY_AMT2 split has loss 0.77688
-Column PAY_AMT3 split has loss 0.77688
-Column PAY_AMT4 split has loss 0.77688
-Column PAY_AMT5 split has loss 0.77688
-Column PAY_AMT6 split has loss 0.77688
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt output_prompt">Out[104]:</div>
+<div class="prompt output_prompt">Out[280]:</div>
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(&#39;LIMIT_BAL&#39;, 0.77688000000000001)</pre>
+<pre>(None, 0.77688000000000001)</pre>
 </div>
 
 </div>
@@ -12926,10 +13156,10 @@ Column PAY_AMT6 split has loss 0.77688
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[106]:</div>
+<div class="prompt input_prompt">In&nbsp;[281]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">train_y</span><span class="p">[</span><span class="n">train_x_t</span><span class="p">[</span><span class="s1">&#39;LIMIT_BAL&#39;</span><span class="p">]])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">train_y</span><span class="p">[</span><span class="n">train_x_t</span><span class="p">[</span><span class="s1">&#39;PAY_00.8&#39;</span><span class="p">]])</span>
 </pre></div>
 
 </div>
@@ -12941,12 +13171,12 @@ Column PAY_AMT6 split has loss 0.77688
 
 
 <div class="output_area">
-<div class="prompt output_prompt">Out[106]:</div>
+<div class="prompt output_prompt">Out[281]:</div>
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.16276337432443017</pre>
+<pre>0.19974715549936789</pre>
 </div>
 
 </div>
@@ -12957,10 +13187,10 @@ Column PAY_AMT6 split has loss 0.77688
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[108]:</div>
+<div class="prompt input_prompt">In&nbsp;[283]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">train_y</span><span class="p">[</span><span class="o">~</span><span class="n">train_x_t</span><span class="p">[</span><span class="s1">&#39;LIMIT_BAL&#39;</span><span class="p">]])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">train_y</span><span class="p">[</span><span class="o">~</span><span class="n">train_x_t</span><span class="p">[</span><span class="s1">&#39;PAY_00.8&#39;</span><span class="p">]])</span>
 </pre></div>
 
 </div>
@@ -12972,12 +13202,12 @@ Column PAY_AMT6 split has loss 0.77688
 
 
 <div class="output_area">
-<div class="prompt output_prompt">Out[108]:</div>
+<div class="prompt output_prompt">Out[283]:</div>
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.28611133818360174</pre>
+<pre>0.13956871914783062</pre>
 </div>
 
 </div>
@@ -12988,10 +13218,10 @@ Column PAY_AMT6 split has loss 0.77688
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[110]:</div>
+<div class="prompt input_prompt">In&nbsp;[284]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">train_y</span><span class="p">[</span><span class="n">train_x_t</span><span class="p">[</span><span class="s1">&#39;AGE&#39;</span><span class="p">]])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">train_y</span><span class="p">[</span><span class="n">train_x_t</span><span class="p">[</span><span class="s1">&#39;AGE0.2&#39;</span><span class="p">]])</span>
 </pre></div>
 
 </div>
@@ -13003,12 +13233,12 @@ Column PAY_AMT6 split has loss 0.77688
 
 
 <div class="output_area">
-<div class="prompt output_prompt">Out[110]:</div>
+<div class="prompt output_prompt">Out[284]:</div>
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.22733317687553783</pre>
+<pre>0.21648985128130602</pre>
 </div>
 
 </div>
@@ -13019,10 +13249,10 @@ Column PAY_AMT6 split has loss 0.77688
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[111]:</div>
+<div class="prompt input_prompt">In&nbsp;[285]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">train_y</span><span class="p">[</span><span class="o">~</span><span class="n">train_x_t</span><span class="p">[</span><span class="s1">&#39;AGE&#39;</span><span class="p">]])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">train_y</span><span class="p">[</span><span class="o">~</span><span class="n">train_x_t</span><span class="p">[</span><span class="s1">&#39;AGE0.2&#39;</span><span class="p">]])</span>
 </pre></div>
 
 </div>
@@ -13034,29 +13264,16 @@ Column PAY_AMT6 split has loss 0.77688
 
 
 <div class="output_area">
-<div class="prompt output_prompt">Out[111]:</div>
+<div class="prompt output_prompt">Out[285]:</div>
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.21871163133338789</pre>
+<pre>0.25453293550608219</pre>
 </div>
 
 </div>
 
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
-</pre></div>
-
-</div>
 </div>
 </div>
 
